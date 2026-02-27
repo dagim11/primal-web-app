@@ -741,42 +741,6 @@ const EditBox: Component<{
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postPoll = async () => {
-    console.log('POLL: ', unwrap(pollState));
-
-    let userRelays = await (new Promise<Record<string, string[]>>(resolve => {
-      const uids = Object.values(userRefs).map(u => u.pubkey);
-      const subId = `users_relays_${APP_ID}`;
-
-      let relays: Record<string, string[]> = {};
-
-      const unsub = subsTo(subId, {
-        onEose: () => {
-          unsub();
-          resolve({ ...relays });
-        },
-        onEvent: (_, content) => {
-          if (content.kind !== Kind.UserRelays) return;
-
-          const pk = content.pubkey || 'UNKNOWN';
-
-          let rels: string[] = [];
-
-          for (let i = 0; i < (content.tags || []).length; i++) {
-            if (rels.length > 1) break;
-
-            const rel = content.tags[i];
-            if (rel[0] !== 'r' || rels.includes(rel[1])) continue;
-
-            rels.push(rel[1]);
-          }
-
-          relays[pk] = [...rels];
-        },
-        onNotice: () => resolve({}),
-      })
-
-      getUsersRelayInfo(uids, subId);
-    }));
 
     const messageToSend = pollState.question;
 
