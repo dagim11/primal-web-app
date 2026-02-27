@@ -2292,6 +2292,11 @@ export const toast = {
     defaultMessage: 'Note posted successfully',
     description: 'Toast message confirming successfull publication of the note',
   },
+  publishPollSuccess: {
+    id: 'toast.publishPollSuccess',
+    defaultMessage: 'Poll posted successfully',
+    description: 'Toast message confirming successfull publication of the poll',
+  },
   publishNoteTimeout: {
     id: 'toast.publishNoteTimeout',
     defaultMessage: 'No relay confirmed reception of your note after 8 seconds',

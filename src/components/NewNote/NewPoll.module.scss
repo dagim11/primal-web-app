@@ -1,0 +1,391 @@
+.newPoll {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  max-height: calc(100vh - 27px);
+  overflow-y: scroll;
+
+  margin: 20px 10px 64px 0;
+  padding-right: 8px;
+}
+
+.questionInput {
+  border: none;
+  margin: 14px 0 0 0;
+
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+
+  &:focus {
+    border: none;
+  }
+
+  &::placeholder {
+    color: var(--text-tertiary-2);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .addChoice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    width: fit-content;
+    height: fit-content;
+
+    .addIcon {
+      display: block;
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent);
+      -webkit-mask: url(../../assets/icons/add.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/add.svg) no-repeat 0 / 100%;
+    }
+
+    span {
+      display: block;
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+  }
+}
+
+.separator {
+  width: 100%;
+  height: 0;
+  border-bottom: 1px solid var(--subtile-devider);
+}
+
+.pollOption {
+  width: 100%;
+  height: fit-content;
+  padding: 8px 12px 10px 12px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  align-self: stretch;
+
+  border-radius: 8px;
+  border: 1px solid var(--subtile-devider);
+  background: var(--background-sheet);
+
+  &[data-focused=true] {
+    border: 1px solid var(--text-secondary);
+  }
+
+  >div {
+    width: 100%;
+  }
+
+  .optionCaption {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+
+    .captionLabel {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+
+      &[data-focused=true] {
+        color: var(--accent);
+      }
+    }
+
+    .charCounter {
+      display: none;
+
+      &[data-focused=true] {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 16px;
+      }
+    }
+  }
+
+  .optionInputLayout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .removeOption {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+
+    width: fit-content;
+    height: fit-content;
+
+    .removeIcon {
+      display: block;
+      width: 10px;
+      height: 10px;
+      background-color: var(--text-tertiary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/close.svg) no-repeat 0 / 100%;
+    }
+
+    span {
+      display: block;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+
+    &:hover {
+      .removeIcon {
+        background-color: var(--text-secondary);
+      }
+      span {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .optionInput {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: fit-content !important;
+    height: fit-content !important;
+
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+
+    &:focus {
+      border: none;
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  &:hover {
+    .removeOption {
+      display: flex;
+    }
+  }
+}
+
+
+.pollTypeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .pollTypeCaption {
+    display: flex;
+
+    >span {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+
+    .pollHelp {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+  }
+
+  .pollTypeOptions {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 7px;
+
+    .pollType {
+      display: flex;
+      gap: 4px;
+      flex-grow: 1;
+
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16px;
+      text-align: left;
+
+      background-color: var(--background-sheet);
+
+      border-radius: 99px;
+      padding: 8px 16px;
+
+      .userIcon {
+        display: block;
+        width: 10px;
+        height: 10px;
+        background-color: var(--text-primary);
+        -webkit-mask: url(../../assets/icons/profile.svg) no-repeat 0 / 100%;
+        mask: url(../../assets/icons/profile.svg) no-repeat 0 / 100%;
+      }
+      .zapIcon {
+        display: block;
+        width: 10px;
+        height: 14px;
+        background-color: var(--text-primary);
+        -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
+        mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
+      }
+
+      &[data-selected=true], &:hover {
+        background-color: var(--subtile-devider);
+      }
+    }
+  }
+
+  .pollZapLimits {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 7px;
+
+    .limitInputWrapper {
+      border-radius: 99px;
+      border: 1px solid var(--subtile-devider);
+      background: var(--background-sheet);
+
+      display: flex;
+      padding: 7px 14px 9px 16px;
+      align-items: baseline;
+      gap: 2px;
+      flex: 1 0 0;
+      cursor: text;
+
+
+      &[data-focused=true] {
+        border: 1px solid var(--text-secondary);
+      }
+
+      >div {
+        display: flex;
+      }
+
+      .limitInput {
+        border: none;
+        outline: none;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: auto !important;
+        height: fit-content !important;
+        field-sizing: content;
+
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 16px;
+
+        &:focus {
+          border: none;
+          outline: none;
+          box-shadow: none;
+        }
+      }
+
+      .zapUnit {
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 13px;
+      }
+
+      .limitType {
+        margin-left: auto;
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 13px;
+      }
+    }
+  }
+}
+
+.pollLengthSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+
+
+  .pollLengthCaption {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+  }
+
+  .pollLengthOptions {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 7px;
+  }
+
+}
+
+.additionalActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+
+    width: fit-content;
+    height: fit-content;
+
+    .deleteIcon {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--warning-bright);
+      -webkit-mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
+      mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
+    }
+
+    span {
+      color: var(--warning-bright);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 18px;
+    }
+  }
+}

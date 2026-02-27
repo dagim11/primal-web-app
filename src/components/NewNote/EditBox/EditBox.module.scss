@@ -91,6 +91,11 @@
       justify-content: center;
       align-items: center;
 
+      button {
+        width: 36px !important;
+        height: 36px !important;
+      }
+
       &:first-child {
         justify-content: flex-start;
         margin-inline: 0;
@@ -108,9 +113,30 @@
       &:hover {
         background-color: var(--text-secondary);
       }
+
+      &[data-disabled=true] {
+        cursor: default;
+        background-color: var(--subtile-devider);
+      }
     }
 
     .emojiIcon {
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      background-color: var(--text-tertiary);
+      cursor: pointer;
+
+      &.highlight {
+        background-color: var(--text-secondary);
+      }
+
+      &:hover {
+        background-color: var(--text-secondary);
+      }
+    }
+
+    .pollIcon {
       width: 24px;
       height: 24px;
       display: inline-block;
@@ -392,4 +418,12 @@ textarea::-webkit-scrollbar{
 
 .highlight {
   margin-block: 8px;
+}
+
+.pollWrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 400px;
+  max-height: calc(100vh - 27px);
 }

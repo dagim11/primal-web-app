@@ -590,11 +590,13 @@ const AdvancedSearch: Component = () => {
                 Search kind
               </div>
 
-              <AdvancedSearchSelectBox
-                value={advSearchState.kind}
-                options={Object.keys(kinds)}
-                onChange={setKind}
-              />
+              <div style="width: 442px;">
+                <AdvancedSearchSelectBox
+                  value={advSearchState.kind}
+                  options={Object.keys(kinds)}
+                  onChange={setKind}
+                />
+              </div>
             </div>
 
             <Show when={orientationKinds.includes(advSearchState.kind)}>
@@ -603,11 +605,13 @@ const AdvancedSearch: Component = () => {
                   Orientation
                 </div>
 
-                <AdvancedSearchSelectBox
-                  value={advSearchState.orientation}
-                  options={orientations}
-                  onChange={setOrientation}
-                />
+                <div style="width: 442px;">
+                  <AdvancedSearchSelectBox
+                    value={advSearchState.orientation}
+                    options={orientations}
+                    onChange={setOrientation}
+                  />
+                </div>
               </div>
             </Show>
 
@@ -750,11 +754,13 @@ const AdvancedSearch: Component = () => {
                 Time posted:
               </div>
 
-              <AdvancedSearchSelectBox
-                value={advSearchState.timeframe}
-                options={Object.keys(timeframes)}
-                onChange={setTimeframe}
-              />
+              <div style="width: 442px;">
+                <AdvancedSearchSelectBox
+                  value={advSearchState.timeframe}
+                  options={Object.keys(timeframes)}
+                  onChange={setTimeframe}
+                />
+              </div>
             </div>
 
             <Show when={advSearchState.timeframe === 'Custom'}>
@@ -798,11 +804,13 @@ const AdvancedSearch: Component = () => {
                 Scope:
               </div>
 
-              <AdvancedSearchSelectBox
-                value={advSearchState.scope}
-                options={Object.keys(scopes)}
-                onChange={setScope}
-              />
+              <div style="width: 442px;">
+                <AdvancedSearchSelectBox
+                  value={advSearchState.scope}
+                  options={Object.keys(scopes)}
+                  onChange={setScope}
+                />
+              </div>
             </div>
 
             <div class={styles.searchRow}>
@@ -810,11 +818,13 @@ const AdvancedSearch: Component = () => {
                 Order by:
               </div>
 
-              <AdvancedSearchSelectBox
-                value={advSearchState.sortBy}
-                options={Object.keys(sortings)}
-                onChange={setSortBy}
-              />
+              <div style="width: 442px;">
+                <AdvancedSearchSelectBox
+                  value={advSearchState.sortBy}
+                  options={Object.keys(sortings)}
+                  onChange={setSortBy}
+                />
+              </div>
             </div>
 
             <div class={styles.searchRow}>

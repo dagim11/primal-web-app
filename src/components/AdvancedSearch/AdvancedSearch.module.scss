@@ -462,6 +462,7 @@
 
 .selectBox {
   display: flex;
+  flex-grow: 1;
 
   @media only screen and (max-width: 720px) {
     width: calc(100dvw - 32px);
@@ -490,7 +491,7 @@
       background-color: var(--subtile-devider);
     }
 
-    width: 442px;
+    width: 100%;
 
     &.shortTrigger {
       width: fit-content;
@@ -505,6 +506,8 @@
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 2px;
+  overflow: auto;
+  max-height: 400px;
 
   li {
     list-style: none;
@@ -584,4 +587,7 @@
   font-weight: 300;
   line-height: 8px;
 
+}
+[data-popper-positioner] {
+  z-index: 1000 !important; /* Adjust as necessary */
 }

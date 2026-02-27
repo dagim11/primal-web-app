@@ -104,6 +104,10 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  UserPoll = 1068,
+  UserPollVote = 1018,
+  ZapPoll = 6969,
+
   LiveChatMessage = 1_311,
   ReportContent = 1_984,
 

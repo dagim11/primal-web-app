@@ -125,3 +125,6 @@ export const dateFuture = (postTimestamp: number, style: Intl.RelativeTimeFormat
 
   return { date, label: `${diff}s` };
 };
+
+
+export const getNowTimestamp = () => Math.floor((new Date()).getTime() / 1_000);

@@ -30,7 +30,7 @@ import {
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews, getParametrizedEvent } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, getParametrizedEvent, sendPoll } from "../../../lib/notes";
 import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
@@ -83,6 +83,7 @@ import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
 import { fetchUserProfile } from "../../../handleFeeds";
 import { accountStore, hasPublicKey, quoteNote, saveEmoji, setShowPin } from "../../../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
+import NewPoll, { calculateEndTimestamp, emptyPoll, PollState } from "../NewPoll";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -112,6 +113,7 @@ const EditBox: Component<{
   let mentionOptions: HTMLDivElement | undefined;
   let emojiOptions: HTMLDivElement | undefined;
   let emojiPicker: HTMLDivElement | undefined;
+  let pollButton: HTMLDivElement | undefined;
   let editWrap: HTMLDivElement | undefined;
   let fileUpload: HTMLInputElement | undefined;
 
@@ -703,6 +705,7 @@ const EditBox: Component<{
     setEmojiQuery('')
     setEmojiResults(() => []);
     updateMediaTags(() => []);
+    setIsCreatingPoll(false)
 
     resetUpload();
 
@@ -737,6 +740,212 @@ const EditBox: Component<{
 
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
+  const postPoll = async () => {
+    console.log('POLL: ', unwrap(pollState));
+
+    let userRelays = await (new Promise<Record<string, string[]>>(resolve => {
+      const uids = Object.values(userRefs).map(u => u.pubkey);
+      const subId = `users_relays_${APP_ID}`;
+
+      let relays: Record<string, string[]> = {};
+
+      const unsub = subsTo(subId, {
+        onEose: () => {
+          unsub();
+          resolve({ ...relays });
+        },
+        onEvent: (_, content) => {
+          if (content.kind !== Kind.UserRelays) return;
+
+          const pk = content.pubkey || 'UNKNOWN';
+
+          let rels: string[] = [];
+
+          for (let i = 0; i < (content.tags || []).length; i++) {
+            if (rels.length > 1) break;
+
+            const rel = content.tags[i];
+            if (rel[0] !== 'r' || rels.includes(rel[1])) continue;
+
+            rels.push(rel[1]);
+          }
+
+          relays[pk] = [...rels];
+        },
+        onNotice: () => resolve({}),
+      })
+
+      getUsersRelayInfo(uids, subId);
+    }));
+
+    const messageToSend = pollState.question;
+
+    if (accountStore) {
+      let tags = referencesToTags(messageToSend, relayHints);
+      const rep = props.replyToNote;
+
+      // @ts-ignore
+      if (rep && rep.naddr) {
+        let rootTag = rep.msg.tags.find(t => t[0] === 'a' && t[3] === 'root');
+
+        const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?
+          rep.relayHints[rep.id] :
+          '';
+
+          // @ts-ignore
+          const decoded = nip19.decode(rep.naddr) as DecodedNaddr;
+
+          const data = decoded.data as nip19.AddressPointer;
+
+          const coord = `${data.kind}:${data.pubkey}:${data.identifier}`;
+
+        // If the note has a root tag, that meens it is not a root note itself
+        // So we need to copy the `root` tag and add a `reply` tag
+        if (rootTag) {
+          const tagWithHint = rootTag.map((v, i) => i === 2 ?
+            rHints :
+            v,
+          );
+          tags.push([...tagWithHint]);
+          tags.push(['a', coord, rHints, 'reply']);
+        }
+        // Otherwise, add the note as the root tag for this reply
+        else {
+          tags.push([
+            'a',
+            coord,
+            rHints,
+            'root',
+          ]);
+        }
+
+        // Copy all `p` tags from the note we are repling to
+        const repPeople = rep.msg.tags.filter(t => t[0] === 'p');
+
+        tags = [...tags, ...(unwrap(repPeople))];
+
+        // If the author of the note is missing, add them
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.pubkey)) {
+          tags.push(['p', rep.pubkey]);
+        }
+      }
+
+      // @ts-ignore
+      if (rep && !rep.naddr) {
+        let rootTag = rep.msg.tags.find(t => t[0] === 'e' && t[3] === 'root');
+
+        const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?
+          rep.relayHints[rep.id] :
+          '';
+
+        // If the note has a root tag, that meens it is not a root note itself
+        // So we need to copy the `root` tag and add a `reply` tag
+        if (rootTag) {
+          const tagWithHint = rootTag.map((v, i) => i === 2 ?
+            rHints :
+            v,
+          );
+          tags.push([...tagWithHint]);
+          tags.push(['e', rep.id, rHints, 'reply']);
+        }
+        // Otherwise, add the note as the root tag for this reply
+        else {
+          tags.push([
+            'e',
+            rep.id,
+            rHints,
+            'root',
+          ]);
+        }
+
+        // Copy all `p` tags from the note we are repling to
+        const repPeople = rep.msg.tags.filter(t => t[0] === 'p');
+
+        tags = [...tags, ...(unwrap(repPeople))];
+
+        // If the author of the note is missing, add them
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.pubkey)) {
+          tags.push(['p', rep.pubkey]);
+        }
+      }
+
+      const relayTags = accountStore.activeRelays.map(r => {
+        let t = ['relay', r];
+
+        const settings = accountStore.relaySettings[r];
+        if (settings && settings.read && !settings.write) {
+          t = [...t, 'read'];
+        }
+        if (settings && !settings.read && settings.write) {
+          t = [...t, 'write'];
+        }
+
+        return t;
+      });
+
+      let mediaTagsToAdd = unwrap(mediaTags);
+
+      mediaTagsToAdd = mediaTagsToAdd.filter(t => {
+        const data = t.find(p => p.startsWith('url'));
+        if (data) {
+          const [_, url] = data.split(' ');
+
+          return message().includes(url);
+        }
+        return false;
+      });
+
+      const endsAt = calculateEndTimestamp(pollState.pollLength)
+
+      let pollTags = [
+        ...pollState.options.map(o => ['option', o.id, o.label]),
+        ['polltype', pollState.pollType],
+        ['endsAt', `${endsAt}`],
+      ];
+
+      tags = [...tags, ...relayTags, ...mediaTagsToAdd, ...pollTags];
+
+      setIsPostingInProgress(true);
+
+      const { success, reasons, note } = await sendPoll(
+        messageToSend,
+        pollState.pollKind,
+        tags,
+      );
+
+      if (success && note) {
+        toast?.sendSuccess(intl.formatMessage(tToast.publishPollSuccess));
+        props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
+        setIsPostingInProgress(false);
+        saveNoteDraft(accountStore.publicKey, '', rep?.noteId)
+        clearEditor();
+        setIsCreatingPoll(false);
+        setPollState(emptyPoll());
+
+        return;
+      }
+
+      if (reasons?.includes('no_extension')) {
+        toast?.sendWarning(intl.formatMessage(tToast.noExtension));
+        setIsPostingInProgress(false);
+        return;
+      }
+
+      if (reasons?.includes('timeout')) {
+        toast?.sendWarning(intl.formatMessage(tToast.publishNoteTimeout));
+        setIsPostingInProgress(false);
+        return;
+      }
+
+      toast?.sendWarning(intl.formatMessage(tToast.publishNoteFail));
+      setIsPostingInProgress(false);
+      return;
+    }
+
+    setIsPostingInProgress(false);
+    clearEditor();
+  }
+
   const postNote = async () => {
 
     if (!hasPublicKey() || fileToUpload()) {
@@ -749,6 +958,11 @@ const EditBox: Component<{
         setShowPin(sec);
         return;
       }
+    }
+
+    if (isCreatingPoll()){
+      postPoll();
+      return;
     }
 
     const value = message();
@@ -917,7 +1131,6 @@ const EditBox: Component<{
 
         return t;
       });
-
 
       let mediaTagsToAdd = unwrap(mediaTags);
 
@@ -1929,6 +2142,18 @@ const EditBox: Component<{
     }
   }
 
+
+  const [isCreatingPoll, setIsCreatingPoll] = createSignal(false);
+
+
+  const [pollState, setPollState] = createStore<PollState>(emptyPoll());
+
+  const isPostingDisabled = () => {
+    if (isCreatingPoll()) return false;
+
+    return isPostingInProgress() || fileToUpload() || message().trim().length === 0;
+  }
+
   return (
     <div
       id={props.id}
@@ -1946,105 +2171,119 @@ const EditBox: Component<{
         </div>
       </Show>
 
-      <div class={styles.editorWrap} onClick={focusInput}>
-        <div>
-          <textarea
-            id={`${prefix()}new_note_text_area`}
-            rows={1}
-            data-min-rows={1}
-            onInput={onInput}
-            ref={textArea}
-            onPaste={onPaste}
-            readOnly={fileToUpload() !== undefined}
-          >
-          </textarea>
-          <Show when={props.context}>
-            <div class={styles.context}>
-              {props.context}
-            </div>
-          </Show>
-          <div
-            class={styles.previewCaption}>
-            {intl.formatMessage(tNote.newPreview)}
-          </div>
-        </div>
-        <div
-          class={styles.editorScroll}
-          id={`${prefix()}new_note_text_preview`}
-        >
-          {renderMessage()}
-          <div class={styles.uploader}>
-            <UploaderBlossom
-              publicKey={accountStore.publicKey}
-              nip05={accountStore.activeUser?.nip05}
-              file={fileToUpload()}
-              onFail={() => {
-                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                  file: fileToUpload()?.name,
-                }));
-                resetUpload();
-              }}
-              onRefuse={(reason: string) => {
-                if (reason === 'file_too_big_100') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-                }
-                if (reason === 'file_too_big_1024') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-                }
-                resetUpload();
-              }}
-              onCancel={() => {
-                resetUpload();
-              }}
-              onSuccsess={(url:string) => {
-                const file = fileToUpload();
-                if (file) {
-                  attachFile(url, unwrap(file));
-                }
-
-                insertAtCursor(` ${url} `);
-
-                onExpandableTextareaInput(new InputEvent('input'));
-
-                if (textArea) {
-                  textArea.focus();
-                  let position = (textArea.selectionEnd || 0);
-                  textArea.selectionEnd = position;
-                }
-                resetUpload();
-              }}
+      <Switch>
+        <Match when={isCreatingPoll()}>
+          <div class={styles.pollWrap}>
+            <NewPoll
+              pollState={pollState}
+              setPollState={setPollState}
+              onRemovePoll={() => setIsCreatingPoll(false)}
             />
-            {/* <Uploader
-              publicKey={accountStore.publicKey}
-              nip05={accountStore.activeUser?.nip05}
-              openSockets={props.open}
-              file={fileToUpload()}
-              onFail={() => {
-                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                  file: fileToUpload()?.name,
-                }));
-                resetUpload();
-              }}
-              onRefuse={(reason: string) => {
-                if (reason === 'file_too_big_100') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-                }
-                if (reason === 'file_too_big_1024') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-                }
-                resetUpload();
-              }}
-              onCancel={() => {
-                resetUpload();
-              }}
-              onSuccsess={(url:string) => {
-                insertAtCursor(` ${url} `);
-                resetUpload();
-              }}
-            /> */}
           </div>
-        </div>
-      </div>
+        </Match>
+
+        <Match when={true}>
+          <div class={styles.editorWrap} onClick={focusInput}>
+            <div>
+              <textarea
+                id={`${prefix()}new_note_text_area`}
+                rows={1}
+                data-min-rows={1}
+                onInput={onInput}
+                ref={textArea}
+                onPaste={onPaste}
+                readOnly={fileToUpload() !== undefined}
+              >
+              </textarea>
+              <Show when={props.context}>
+                <div class={styles.context}>
+                  {props.context}
+                </div>
+              </Show>
+              <div
+                class={styles.previewCaption}>
+                {intl.formatMessage(tNote.newPreview)}
+              </div>
+            </div>
+            <div
+              class={styles.editorScroll}
+              id={`${prefix()}new_note_text_preview`}
+            >
+              {renderMessage()}
+              <div class={styles.uploader}>
+                <UploaderBlossom
+                  publicKey={accountStore.publicKey}
+                  nip05={accountStore.activeUser?.nip05}
+                  file={fileToUpload()}
+                  onFail={() => {
+                    toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                      file: fileToUpload()?.name,
+                    }));
+                    resetUpload();
+                  }}
+                  onRefuse={(reason: string) => {
+                    if (reason === 'file_too_big_100') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                    }
+                    if (reason === 'file_too_big_1024') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                    }
+                    resetUpload();
+                  }}
+                  onCancel={() => {
+                    resetUpload();
+                  }}
+                  onSuccsess={(url:string) => {
+                    const file = fileToUpload();
+                    if (file) {
+                      attachFile(url, unwrap(file));
+                    }
+
+                    insertAtCursor(` ${url} `);
+
+                    onExpandableTextareaInput(new InputEvent('input'));
+
+                    if (textArea) {
+                      textArea.focus();
+                      let position = (textArea.selectionEnd || 0);
+                      textArea.selectionEnd = position;
+                    }
+                    resetUpload();
+                  }}
+                />
+                {/* <Uploader
+                  publicKey={accountStore.publicKey}
+                  nip05={accountStore.activeUser?.nip05}
+                  openSockets={props.open}
+                  file={fileToUpload()}
+                  onFail={() => {
+                    toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                      file: fileToUpload()?.name,
+                    }));
+                    resetUpload();
+                  }}
+                  onRefuse={(reason: string) => {
+                    if (reason === 'file_too_big_100') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                    }
+                    if (reason === 'file_too_big_1024') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                    }
+                    resetUpload();
+                  }}
+                  onCancel={() => {
+                    resetUpload();
+                  }}
+                  onSuccsess={(url:string) => {
+                    insertAtCursor(` ${url} `);
+                    resetUpload();
+                  }}
+                /> */}
+              </div>
+            </div>
+          </div>
+        </Match>
+      </Switch>
 
 
       <Show when={isMentioning()}>
@@ -2119,9 +2358,27 @@ const EditBox: Component<{
               ref={fileUpload}
               hidden={true}
               accept="image/*,video/*,audio/*,application/pdf"
+              disabled={isCreatingPoll()}
             />
-            <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
+            <label
+              for={`upload-${instanceId}`}
+              class={`attach_icon ${styles.attachIcon}`}
+              data-disabled={isCreatingPoll()}
+            >
             </label>
+          </div>
+          <div class={styles.editorOption}>
+            <ButtonGhost
+              disabled={isCreatingPoll()}
+              onClick={() => {
+                setIsCreatingPoll((v) => !v);
+                !isCreatingPoll() && textArea?.focus();
+              }}>
+              <div
+                ref={pollButton}
+                class={`poll_icon ${styles.pollIcon} ${isCreatingPoll() ? styles.highlight : ''}`}
+              ></div>
+            </ButtonGhost>
           </div>
           <div class={styles.editorOption}>
             <ButtonGhost
@@ -2151,7 +2408,7 @@ const EditBox: Component<{
         <div class={styles.editorDescision}>
           <ButtonPrimary
             onClick={postNote}
-            disabled={isPostingInProgress() || fileToUpload() || message().trim().length === 0}
+            disabled={isPostingDisabled()}
           >
             {intl.formatMessage(tActions.notePostNew)}
           </ButtonPrimary>

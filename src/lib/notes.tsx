@@ -522,6 +522,38 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
   return await sendEvent(event);
 }
 
+export const sendPoll = (question: string, kind: Kind.UserPoll | Kind.ZapPoll, tags: string[][]) => {
+  const event = {
+    content: question,
+    kind,
+    tags,
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  if (kind !== Kind.UserPoll) {
+    return new Promise<SendNoteResult>((resolve) => {
+      resolve({ success: false });
+    });
+  }
+
+  return new Promise<SendNoteResult>((resolve) => {
+    sendEvent(event, {
+      success: (pollEvent) => {
+        if (pollEvent) {
+          triggerImportEvents([pollEvent], `import_${APP_ID}`)
+          resolve({ success: true, note: pollEvent });
+          return;
+        }
+
+        resolve({ success: false, reasons: ['failed-to-publish']});
+      },
+      fail: (noteEvent) => {
+        resolve({ success: false, note: noteEvent });
+      }
+    });
+  })
+}
+
 export const generateIdentifier = (title: string) => {
   let str = title.toLowerCase();
 
