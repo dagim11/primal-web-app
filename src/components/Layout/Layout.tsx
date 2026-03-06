@@ -35,6 +35,7 @@ import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
 import { accountStore, checkNostrKey, doAfterLogin, loginUsingLocalNsec, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
 import { storeSec } from '../../lib/localStore';
 import GetStartedModal from '../LoginModal/GetStartedModal';
+import VotesModal from '../UserPoll/VotesModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -135,6 +136,11 @@ const Layout: Component<any> = (props) => {
           noteId={app?.showReactionsModal}
           stats={app?.reactionStats}
           onClose={() => app?.actions.closeReactionModal()}
+        />
+
+        <VotesModal
+          poll={app?.showVotesModal}
+          onClose={() => app?.actions.closeVotesModal()}
         />
 
         <CustomZap

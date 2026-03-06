@@ -6,7 +6,7 @@ import { hookForDev } from '../../lib/devTools';
 import { zapArticle, zapDVM, zapNote, zapProfile, zapStream } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
+import { PrimalDVM, PrimalNote, PrimalUser, PrimalUserPoll, ZapOption } from '../../types/primal';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
@@ -21,7 +21,7 @@ import { accountStore, hasPublicKey, setShowPin, showGetStarted } from '../../st
 const CustomZap: Component<{
   id?: string,
   open?: boolean,
-  note?: PrimalNote,
+  note?: PrimalNote | PrimalUserPoll,
   profile?: PrimalUser,
   dvm?: PrimalDVM,
   stream?: StreamingData,
@@ -120,6 +120,7 @@ const CustomZap: Component<{
           [Kind.Text]: zapNote,
           [Kind.LongForm]: zapArticle,
           [Kind.LongFormShell]: zapArticle,
+          [Kind.UserPoll]: zapNote,
         }
 
         const success = await zappers[note.msg.kind](

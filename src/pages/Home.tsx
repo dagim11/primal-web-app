@@ -34,6 +34,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import { Kind } from '../constants';
 import { userName } from '../stores/profile';
 import { date } from '../lib/dates';
+import UserPoll from '../components/UserPoll/UserPoll';
 
 
 const Home: Component = () => {
@@ -184,9 +185,9 @@ const Home: Component = () => {
                     </Match>
                     <Match when={note.msg.kind === Kind.UserPoll}>
                       <div class="animated">
-                        <div>
-                          <div>Poll: {note.question} {userName(note.user)} {date(note.msg.created_at || 0).label}</div>
-                        </div>
+                        <UserPoll
+                          poll={note}
+                        />
                       </div>
                     </Match>
                   </Switch>

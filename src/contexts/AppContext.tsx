@@ -19,6 +19,7 @@ import {
   PrimalDVM,
   PrimalNote,
   PrimalUser,
+  PrimalUserPoll,
   ZapOption,
 } from "../types/primal";
 import {
@@ -56,7 +57,7 @@ export type ReactionStats = {
 
 export type CustomZapInfo = {
   profile?: PrimalUser,
-  note?: PrimalNote | PrimalArticle,
+  note?: PrimalNote | PrimalArticle | PrimalUserPoll,
   dvm?: PrimalDVM,
   stream?: StreamingData,
   streamAuthor?: PrimalUser,
@@ -118,6 +119,7 @@ export type AppContextStore = {
   appState: 'sleep' | 'waking' | 'woke',
   showReactionsModal: string | undefined,
   reactionStats: ReactionStats,
+  showVotesModal: PrimalUserPoll | undefined,
   showCustomZapModal: boolean,
   customZap: CustomZapInfo | undefined,
   showNoteContextMenu: boolean,
@@ -148,6 +150,8 @@ export type AppContextStore = {
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
+    openVotesModal: (poll: PrimalUserPoll) => void,
+    closeVotesModal: () => void,
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
     resetCustomZap: () => void,
@@ -219,6 +223,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
     quotes: 0,
     openOn: 'default',
   },
+  showVotesModal: undefined,
   showCustomZapModal: false,
   customZap: undefined,
   showNoteContextMenu: false,
@@ -279,6 +284,15 @@ export const AppProvider = (props: { children: JSXElement }) => {
       quotes: 0,
     }));
     updateStore('showReactionsModal', () => undefined);
+  };
+
+
+  const openVotesModal = (poll: PrimalUserPoll) => {
+    updateStore('showVotesModal', () => ({...poll}));
+  };
+
+  const closeVotesModal = () => {
+    updateStore('showVotesModal', () => undefined);
   };
 
   const openCustomZapModal = (customZapInfo: CustomZapInfo) => {
@@ -681,6 +695,8 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     actions: {
       openReactionModal,
       closeReactionModal,
+      openVotesModal,
+      closeVotesModal,
       openCustomZapModal,
       closeCustomZapModal,
       resetCustomZap,

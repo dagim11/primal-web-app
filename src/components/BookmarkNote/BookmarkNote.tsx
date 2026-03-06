@@ -22,7 +22,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
 
   createEffect(() => {
-    setIsBookmarked(() => accountStore.bookmarks.includes(props.note.post.id) || false);
+    setIsBookmarked(() => accountStore.bookmarks.includes(props.note.id) || false);
   })
 
   const updateTheBookmarks = (bookmarkTags: string[][], temp?: boolean) => {
@@ -55,8 +55,8 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
       }
     }
 
-    if (!bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
-      const bookmarksToAdd = [...bookmarkTags, ['e', props.note.post.id]];
+    if (!bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.id)) {
+      const bookmarksToAdd = [...bookmarkTags, ['e', props.note.id]];
 
       if (bookmarksToAdd.length < 2) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);
@@ -81,8 +81,8 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
   }
 
   const removeBookmark = async (bookmarks: string[][], temp?: boolean) => {
-    if (bookmarks.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
-      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.post.id);
+    if (bookmarks.find(b => b[0] === 'e' && b[1] === props.note.id)) {
+      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.id);
 
       if (bookmarksToAdd.length < 1) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);

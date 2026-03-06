@@ -14,8 +14,8 @@ import "./SelectBox.scss";
 const SelectBox: Component<{
   options: () => FeedOption[],
   onChange: (value: any) => void,
-  initialValue: any,
-  isSelected: (value: any) => boolean,
+  initialValue?: any,
+  isSelected: (FeedOption: any) => boolean,
   isPhone?: boolean,
   id?: string,
 }> = (props) => {

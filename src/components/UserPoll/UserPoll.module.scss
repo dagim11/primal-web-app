@@ -1,0 +1,270 @@
+.userPoll {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px;
+  margin: 0px;
+
+  text-decoration: none;
+  color: unset;
+  background-color: var(--background-site);
+  border: none;
+  border-bottom: 1px solid var(--devider);
+  border-radius: 0;
+
+  -webkit-user-select: text;
+  -moz-select: text;
+  -ms-select: text;
+  user-select: text;
+
+  width: 100%;
+
+  &.parent {
+    border: none;
+  }
+
+  &.reactionNote {
+    background: none;
+    border-bottom: 1px solid var(--subtile-devider);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .repostedBy {
+      padding-bottom: 8px;
+      display: flex;
+      >span {
+        >a {
+          margin-inline: 5px;
+          color: var(--text-tertiary);
+          text-decoration: none;
+        }
+        color: var(--text-tertiary);
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: 400;
+        >span {
+          text-transform: lowercase;
+        }
+      }
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+
+    .leftSide {
+      width: 42px;
+      margin-right: 8px;
+
+      .ancestorLine {
+        border-left: 1px solid var(--devider);
+        height: calc(100% - 12px);
+        margin-left: 21px;
+      }
+    }
+
+    .rightSide {
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - 18px);
+
+      .question {
+        color: var(--text-primary);
+        word-break: break-word;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        width: 100%;
+        overflow: hidden;
+
+        &.bigFont {
+          font-size: 24px;
+          font-weight: 400;
+          line-height: 32px;
+        }
+      }
+
+      .choices {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        .choice {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 12px;
+          border-radius: 99px;
+          border: 1px solid var(--subtile-devider);
+          background: var(--background-input);
+
+          color: var(--text-primary);
+          text-align: center;
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 20px;
+        }
+
+        .choiceResult {
+          position: relative;
+          width: 100%;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 2px 0;
+
+          .option {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: calc(100% - 64px);
+            height: 32px;
+            .label {
+              position: relative;
+              z-index: 1;
+              padding-left: 12px;
+
+              display: flex;
+              align-items: center;
+              gap: 6px;
+
+              .text {
+                color: var(--text-primary);
+                font-size: 15px;
+                font-weight: 400;
+                line-height: 20px;
+
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                line-clamp: 1;
+                -webkit-box-orient: vertical;
+                text-align: left;
+              }
+
+
+              .check {
+                width: 16px;
+                height: 16px;
+                min-width: 16px;
+                border-radius: 99px;
+                flex-grow: 1;
+
+                background-color: var(--text-primary);
+                -webkit-mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
+                mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
+              }
+            }
+
+            .graph {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: var(--percent-width, 0%);
+              height: 32px;
+              border-radius: 6px;
+              background-color: var(--subtile-devider);
+
+              &.highlight {
+                background-color: var(--accent);
+              }
+
+              &.transparent {
+                opacity: 0.5;
+              }
+
+            }
+
+          }
+
+          .number {
+            width: 60px;
+            color: var(--text-primary);
+            text-align: right;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 20px;
+          }
+        }
+      }
+
+      .pollStats {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 4px;
+
+        div {
+          color: var(--text-tertiary);
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 16px;
+        }
+
+        button {
+          margin: 0;
+          padding: 0;
+          border: none;
+          outline: none;
+          color: var(--text-tertiary);
+          font-size: 14px;
+          font-weight: 800;
+          line-height: 16px;
+          width: fit-content;
+
+          &:hover {
+            color: var(--accent);
+          }
+        }
+      }
+
+      .replyingTo {
+        display: flex;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 6px;
+        max-width: 518px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        .label {
+          color: var(--text-primary);
+        }
+        a {
+          max-width: 440px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        .author {
+          display: inline-block;
+          color: var(--accent-links);
+          text-decoration: none;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .upRightFloater {
+    position: absolute;
+    top: 0px;
+    right: 8px;
+  }
+}

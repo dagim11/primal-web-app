@@ -30,7 +30,7 @@ const NoteFooterActionButton: Component<{
 
   return (
     <button
-      id={`btn_${props.type}_${props.note.post.id}`}
+      id={`btn_${props.type}_${props.note.id}`}
       class={`${styles.stat} ${props.highlighted ? styles.highlighted : ''}`}
       onClick={props.onClick ?? (() => {})}
       onMouseDown={props.onMouseDown ?? (() => {})}

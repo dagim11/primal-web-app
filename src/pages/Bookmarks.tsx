@@ -75,8 +75,7 @@ const Bookmarks: Component = () => {
 
     const spec = JSON.stringify({
       id: 'feed',
-      kind: 'notes',
-      kinds: [k],
+      kinds: [k, 1068],
       notes: 'bookmarks',
       pubkey,
     });

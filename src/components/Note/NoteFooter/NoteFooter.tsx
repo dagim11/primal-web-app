@@ -138,7 +138,7 @@ const NoteFooter: Component<{
 
   const onClickOutside = (e: MouseEvent) => {
     if (
-      !document?.getElementById(`repost_menu_${props.note.post.id}`)?.contains(e.target as Node) &&
+      !document?.getElementById(`repost_menu_${props.note.id}`)?.contains(e.target as Node) &&
       props.updateState
     ) {
       props.updateState('isRepostMenuVisible', () => false);
@@ -165,7 +165,7 @@ const NoteFooter: Component<{
       return;
     }
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
-    quoteNote(`nostr:${props.note.post.noteId}`);
+    quoteNote(`nostr:${props.note.noteId}`);
     showNewNoteForm();
   };
 
@@ -434,7 +434,7 @@ const NoteFooter: Component<{
     >
       <Show when={props.state.showZapAnim}>
         <ZapAnimation
-          id={`note-med-zap-${props.note.post.id}`}
+          id={`note-med-zap-${props.note.id}`}
           src={zapMD}
           class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
           ref={medZapAnimation}
@@ -480,7 +480,7 @@ const NoteFooter: Component<{
       />
 
       <button
-        id={`btn_repost_${props.note.post.id}`}
+        id={`btn_repost_${props.note.id}`}
         class={`${styles.stat} ${props.state.reposted ? styles.highlighted : ''}`}
         onClick={showRepostMenu}
       >
@@ -498,7 +498,7 @@ const NoteFooter: Component<{
             </div>
           </Show>
           <PrimalMenu
-            id={`repost_menu_${props.note.post.id}`}
+            id={`repost_menu_${props.note.id}`}
             items={repostMenuItems()}
             position="note_footer"
             orientation={determineOrient(repostMenu as HTMLElement)}

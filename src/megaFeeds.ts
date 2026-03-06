@@ -1,6 +1,6 @@
 import { Kind } from "./constants";
 import { getArticleThread, getMegaFeed, getMultiFeed } from "./lib/feed";
-import { parseLinkPreviews, setLinkPreviews } from "./lib/notes";
+import { parseLinkPreviews, PollVote, setLinkPreviews } from "./lib/notes";
 import { subsTo } from "./sockets";
 import { isRepostInCollection } from "./stores/note";
 import {
@@ -30,7 +30,7 @@ import {
   UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
-import { convertToDraftsMega, convertToNotesMega, convertToReadsMega, convertToUserPollsMega, convertToUsersMega } from "./stores/megaFeed";
+import { convertToDraftsMega, convertToNotesMega, convertToPollVotesMega, convertToReadsMega, convertToUserPollsMega, convertToUsersMega } from "./stores/megaFeed";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
@@ -75,6 +75,7 @@ export type MegaFeedResults = {
   drafts: PrimalDraft[],
   zaps: PrimalZap[],
   userPolls: PrimalUserPoll[],
+  pollVotes: PollVote[],
   topicStats: TopicStat[],
   paging: PaginationInfo,
   page: MegaFeedPage,
@@ -101,6 +102,7 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   userPolls: [],
   zapPolls: [],
   pollResults: {},
+  pollVotes: [],
   topicStats: {},
   noteStats: {},
   mentions: {},
@@ -131,6 +133,7 @@ export const emptyMegaFeedResults = () => ({
   drafts: [],
   zaps: [],
   userPolls: [],
+  pollVotes: [],
   topicStats: [],
   dmContacts: [],
   paging: { ...emptyPaging() },
@@ -840,6 +843,7 @@ export const pageResolve = (page: MegaFeedPage) => {
   const leaderboard = [ ...page.leaderboard ];
 
   const userPolls = convertToUserPollsMega(page);
+  const pollVotes = convertToPollVotesMega(page);
 
   return {
     users,
@@ -848,6 +852,7 @@ export const pageResolve = (page: MegaFeedPage) => {
     drafts,
     zaps,
     userPolls,
+    pollVotes,
     topicStats,
     dmContacts,
     encryptedMessages,
@@ -916,6 +921,13 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
     const message = content as NostrNoteContent;
 
     page.userPolls.push({ ...message });
+    return;
+  }
+
+  if ([Kind.UserPollVote].includes(content.kind)) {
+    const message = content as NostrNoteContent;
+
+    page.pollVotes.push({ ...message });
     return;
   }
 

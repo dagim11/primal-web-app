@@ -8,11 +8,8 @@ import AdvancedSearchSelectBox from "../AdvancedSearch/AdvancedSearchSelect";
 
 import styles from  "./NewPoll.module.scss";
 import { Kind } from "../../constants";
+import { PrimalPollChoice } from "../../types/primal";
 
-export type PollOption = {
-  id: string,
-  label: string,
-}
 
 export type PollLength = {
   days: string,
@@ -22,7 +19,7 @@ export type PollLength = {
 
 export type PollState = {
   question: string,
-  options: PollOption[],
+  options: PrimalPollChoice[],
   pollKind: Kind.UserPoll | Kind.ZapPoll,
   pollType: 'singlechoice' | 'multiplechoice',
   endsAt: number,
@@ -36,8 +33,8 @@ export type PollState = {
 export const emptyPoll = (): PollState => ({
   question: '',
   options: [
-    { id: uuidv4(), label: ''},
-    { id: uuidv4(), label: ''},
+    { id: uuidv4(), label: '', index: 0},
+    { id: uuidv4(), label: '', index: 1},
   ],
   pollKind: Kind.UserPoll,
   pollType: 'singlechoice',
@@ -88,7 +85,7 @@ const NewPoll: Component<{
     props.setPollState('options', props.pollState.options.length, () => ({ id: uuidv4(), label: '' }))
   }
 
-  const removeChoice = (option: PollOption) => {
+  const removeChoice = (option: PrimalPollChoice) => {
     if (props.pollState.options.length <= 2) return;
     props.setPollState('options', (options) => options.filter(o => option.id !== o.id));
   }

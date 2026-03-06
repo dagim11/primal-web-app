@@ -3,7 +3,7 @@ import { createStore, unwrap } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
-import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, SendNoteResult } from "../types/primal";
+import { EventCoordinate, MediaSize, MegaFeedPage, NostrNoteContent, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalPollChoice, PrimalUser, PrimalUserPoll, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
@@ -12,6 +12,7 @@ import { ArticleEdit } from "../pages/ReadsEditor";
 import { APP_ID, relayWorker } from "../App";
 import { accountStore, dequeEvent, enqueEvent } from "../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
+import { emptyMegaFeedPage, emptyMegaFeedResults, FeedPaging, MegaFeedResults, pageResolve, updateFeedPage } from "../megaFeeds";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -522,24 +523,13 @@ export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) =>
   return await sendEvent(event);
 }
 
-export const sendPoll = (question: string, kind: Kind.UserPoll | Kind.ZapPoll, tags: string[][]) => {
+export const sendPoll = (question: string, kind: Kind.UserPoll | Kind.ZapPoll, tags: string[][], created_at?: number) => {
   const event = {
     content: question,
     kind,
     tags,
-    created_at: Math.floor((new Date()).getTime() / 1000),
+    created_at: created_at || Math.floor((new Date()).getTime() / 1000),
   };
-
-
-  // signEvent(event).then((se => {
-  //   console.log('EVENT: ', se);
-  // }))
-
-  // if (kind !== Kind.UserPoll) {
-    // return new Promise<SendNoteResult>((resolve) => {
-    //   resolve({ success: false });
-    // });
-  // }
 
   return new Promise<SendNoteResult>((resolve) => {
     sendEvent(event, {
@@ -557,6 +547,25 @@ export const sendPoll = (question: string, kind: Kind.UserPoll | Kind.ZapPoll, t
       }
     });
   })
+}
+export const sendUserPollVote = async (poll: PrimalUserPoll, choice: PrimalPollChoice) => {
+  const event = {
+    content: '',
+    kind: Kind.UserPollVote,
+    tags: [
+      ['e', poll.id],
+      ['response', choice.id],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  const event_from_user = await signEvent(event);
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    `vote_${choice.id}_${APP_ID}`,
+    {cache: ["import_poll_vote_event", { event_from_user }]},
+  ]));
 }
 
 export const generateIdentifier = (title: string) => {
@@ -852,6 +861,61 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
   importEvents(events, subId);
 };
 
+export type PollVote = {
+  user: PrimalUser,
+  msg: NostrNoteContent,
+  tags: string[][],
+  id: string,
+  pubkey: string,
+  response: string,
+}
+
+export const getPollVotes = (pollId: string, option: string, paging?: FeedPaging) => {
+  const subId = `poll_votes_${pollId}_${APP_ID}`;
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["poll_votes", { event_id: pollId, option, limit, offset }]},
+    ]));
+  });
+};
 
 export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
   let event_id: string | undefined = eventId;

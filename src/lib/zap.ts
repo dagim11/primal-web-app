@@ -1,7 +1,7 @@
 import { bech32 } from "@scure/base";
 import { nip04, nip47, nip57, utils } from "../lib/nTools";
 import { Kind } from "../constants";
-import { NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalZap, } from "../types/primal";
+import { NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, } from "../types/primal";
 import { logError } from "./logger";
 import { decrypt, enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 import { decodeNWCUri } from "./wallet";
@@ -50,7 +50,7 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
 };
 
 export const zapNote = async (
-  note: PrimalNote,
+  note: PrimalNote | PrimalUserPoll,
   sender: string | undefined,
   amount: number,
   comment = '',

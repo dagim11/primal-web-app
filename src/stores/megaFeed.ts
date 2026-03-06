@@ -1,10 +1,10 @@
 import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import { sanitize } from "../lib/notes";
+import { PollVote, sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
-import { parseBolt11, selectRelayTags } from "../utils";
+import { now, parseBolt11, selectRelayTags } from "../utils";
 import { logError } from "../lib/logger";
 import { StreamingData } from "../lib/streaming";
 
@@ -931,9 +931,12 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
     const author = convertToUser(page.users[pagePoll.pubkey], pagePoll.pubkey);
     const results = page.pollResults[pagePoll.id];
     const topZaps = page.topZaps[pagePoll.id] || [];
+    const stats = page.noteStats[pagePoll.id];
+
 
     const tags = pagePoll.tags || [];
     const replyTo = extractReplyTo(tags);
+    const endsAt = parseInt((pagePoll.tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
 
     const choices = pagePoll.tags.reduce<{ id: string, label: string, index: number }[]>(
       (acc, t, index) => {
@@ -983,9 +986,45 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
       choices,
       results,
       relayHints: page.relayHints,
+      noteActions: (page.noteActions && page.noteActions[pagePoll.id]) ?? noActions(pagePoll.id),
+      endsAt,
+      topZaps,
+      stats,
     };
 
     userPolls.push(newPoll);
   }
   return userPolls;
+};
+
+
+export const convertToPollVotesMega = (page: MegaFeedPage) => {
+
+  if (page === undefined) {
+    return [];
+  }
+
+  let i = 0;
+
+  let pollVotes: any[] = [];
+
+  for (i=0;i<page.pollVotes.length;i++) {
+    const pollVote = page.pollVotes[i];
+
+    const author = convertToUser(page.users[pollVote.pubkey], pollVote.pubkey);
+
+    const response = (pollVote.tags.find(t => t[0] === 'response') || ['response', ''])[1];
+
+    const newPoll: PollVote = {
+      user: author,
+      msg: pollVote,
+      tags: pollVote.tags,
+      id: pollVote.id,
+      pubkey: pollVote.pubkey,
+      response,
+    };
+
+    pollVotes.push(newPoll);
+  }
+  return pollVotes;
 };

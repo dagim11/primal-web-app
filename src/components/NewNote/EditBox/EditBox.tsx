@@ -35,7 +35,7 @@ import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { debounce, getScreenCordinates, isVisibleInContainer, replaceAsync, sha256, uuidv4 } from "../../../utils";
+import { debounce, getScreenCordinates, isVisibleInContainer, now, replaceAsync, sha256, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
 import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
@@ -1024,6 +1024,7 @@ const EditBox: Component<{
         return false;
       });
 
+      const createdAt = now();
       const endsAt = calculateEndTimestamp(pollState.pollLength)
 
       let pollTags: string[][] = [];
@@ -1055,6 +1056,7 @@ const EditBox: Component<{
         questionToSend,
         pollState.pollKind,
         tags,
+        createdAt,
       );
 
       if (success && note) {

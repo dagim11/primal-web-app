@@ -640,6 +640,7 @@ export type NoteActions = {
   replied: boolean,
   reposted: boolean,
   zapped: boolean,
+  voted_for_option?: string,
 };
 
 export type FeedStore = {
@@ -708,6 +709,7 @@ export type MegaFeedPage = {
   userPolls: NostrNoteContent[],
   zapPolls: NostrNoteContent[],
   pollResults: Record<string, PollResults>,
+  pollVotes: NostrNoteContent[],
   topicStats: TopicStats,
   mentions: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
@@ -993,6 +995,12 @@ export type PrimalDraft = {
   repost?: PrimalRepost,
 }
 
+export type PrimalPollChoice = {
+  id: string,
+  label: string,
+  index: number,
+};
+
 export type PrimalUserPoll = {
   user: PrimalUser,
   msg: NostrNoteContent,
@@ -1009,9 +1017,23 @@ export type PrimalUserPoll = {
   noteIdShort: string,
   tags: string[][],
   question: string,
-  choices: { id: string, label: string, index: number }[],
+  choices: PrimalPollChoice[],
   results: PollResults,
   relayHints?: Record<string, string>,
+  noteActions: NoteActions,
+  endsAt: number,
+  topZaps: TopZap[],
+  stats: {
+    likes: number,
+    mentions: number,
+    reposts: number,
+    replies: number,
+    zaps: number,
+    satszapped: number,
+    score: number,
+    score24h: number,
+    bookmarks: number,
+  },
 };
 
 export type PrimalFeed = {
