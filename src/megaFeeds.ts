@@ -1,5 +1,5 @@
 import { Kind } from "./constants";
-import { getArticleThread, getMegaFeed, getMultiFeed } from "./lib/feed";
+import { getArticleThread, getMegaFeed, getMultiFeed, getMultiThread } from "./lib/feed";
 import { parseLinkPreviews, PollVote, setLinkPreviews } from "./lib/notes";
 import { subsTo } from "./sockets";
 import { isRepostInCollection } from "./stores/note";
@@ -159,6 +159,32 @@ export const parseEmptyReposts = (page: MegaFeedPage) => {
   return reposts;
 };
 
+export const fetchMultiThread = (
+  pubkey: string | undefined,
+  noteId: string,
+  until = 0,
+  limit = 100,
+) => {
+  const subId = `multi_thread_${noteId}_${APP_ID}`;
+
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEose: () => {
+        unsub();
+        resolve(pageMultiFeedResolve(page));
+      },
+      onEvent: (s, content) => {
+        updateFeedPage(page, content);
+      }
+    });
+
+
+    getMultiThread(pubkey, noteId, subId, until, limit);
+
+  });
+};
 
 export const fetchMegaMultiFeed = (
   pubkey: string | undefined,

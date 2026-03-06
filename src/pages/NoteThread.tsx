@@ -1,14 +1,14 @@
-import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, Match, onCleanup, Show, Switch } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './NoteThread.module.scss';
 import { useNavigate } from '@solidjs/router';
-import { PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
+import { PrimalArticle, PrimalNote, PrimalUser, PrimalUserPoll, SendNoteResult } from '../types/primal';
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
-import { sortByRecency } from '../stores/note';
+import { sortByRecency, sortEventsByRecency } from '../stores/note';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { placeholders as tPlaceholders, thread as t } from '../translations';
@@ -25,6 +25,8 @@ import { isPhone } from '../utils';
 import { noteIdToHex } from '../lib/keys';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { accountStore, hasPublicKey } from '../stores/accountStore';
+import { Kind } from '../constants';
+import UserPoll from '../components/UserPoll/UserPoll';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -41,7 +43,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
   const threadContext = useThreadContext();
 
 
-  const noteLinkId = (note: PrimalNote) => {
+  const noteLinkId = (note: PrimalNote | PrimalUserPoll) => {
     try {
       return `/e/${note.noteIdShort}`;
     } catch(e) {
@@ -74,10 +76,10 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       return [];
     }
 
-    return sortByRecency(
+    return sortEventsByRecency(
       threadContext?.notes.filter(n =>
-        n.post.id !== note.post.id &&
-        // n.post.created_at <= note.post.created_at &&
+        n.id !== note.id &&
+        // n.created_at <= note.created_at &&
         !n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root' || t[3] === 'fork') && t[1] === note.id),
       ) || [],
       true,
@@ -92,8 +94,8 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     }
 
     return threadContext?.notes.filter(n =>
-      n.post.id !== note.post.id &&
-      // n.post.created_at >= note.post.created_at &&
+      n.id !== note.id &&
+      // n.created_at >= note.created_at &&
       n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),
     ) || [];
   };
@@ -255,17 +257,28 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                   </div>
               }>
                 <div id="primary_note" class={`${styles.primaryNote} animated`}>
-                  <Note
-                    note={primaryNote() as PrimalNote}
-                    noteType="primary"
-                    quoteCount={threadContext?.quoteCount}
-                    onRemove={(id: string, isRepost?: boolean) => {
-                      if (isRepost) return;
 
-                      toast?.sendSuccess('Delete request sent');
-                      navigate('/home');
-                    }}
-                  />
+                  <Switch>
+                    <Match when={primaryNote()?.msg.kind === Kind.Text}>
+                      <Note
+                        note={primaryNote() as PrimalNote}
+                        noteType="primary"
+                        quoteCount={threadContext?.quoteCount}
+                        onRemove={(id: string, isRepost?: boolean) => {
+                          if (isRepost) return;
+
+                          toast?.sendSuccess('Delete request sent');
+                          navigate('/home');
+                        }}
+                      />
+                    </Match>
+                    <Match  when={primaryNote()?.msg.kind === Kind.UserPoll}>
+                      <UserPoll
+                        poll={primaryNote()}
+                      />
+                    </Match>
+                  </Switch>
+
                   <Show when={hasPublicKey()}>
                     <ReplyToNote
                       note={primaryNote() as PrimalNote}
@@ -279,16 +292,25 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                 <For each={replyNotes()}>
                   {note =>
                     <div class="animated">
-                      <Note
-                        note={note}
-                        shorten={true}
-                        noteType="thread"
-                        onRemove={(id: string, isRepost?: boolean) => {
-                          if (isRepost) return;
+                      <Switch>
+                        <Match when={note.msg.kind === Kind.Text}>
+                          <Note
+                            note={note}
+                            shorten={true}
+                            noteType="thread"
+                            onRemove={(id: string, isRepost?: boolean) => {
+                              if (isRepost) return;
 
-                          threadContext?.actions.removeEvent(id, 'notes');
-                        }}
-                      />
+                              threadContext?.actions.removeEvent(id, 'notes');
+                            }}
+                          />
+                        </Match>
+                        <Match  when={note.msg.kind === Kind.UserPoll}>
+                          <UserPoll
+                            poll={note}
+                          />
+                        </Match>
+                      </Switch>
                     </div>
                   }
                 </For>

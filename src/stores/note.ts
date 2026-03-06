@@ -4,7 +4,7 @@ import { Kind, mentionRegexNostrless, noteRegex } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap, PrimalArticle, NostrRelaySignedEvent } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap, PrimalArticle, NostrRelaySignedEvent, PrimalUserPoll } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 import { StreamingData } from "../lib/streaming";
 import { encodeCoordinate } from "./megaFeed";
@@ -999,6 +999,14 @@ const sortBy = (a: PrimalNote, b: PrimalNote, property: string) => {
   const bData: Record<string, any> = b.repost ? b.repost.note : b.post;
 
   return bData[property] - aData[property];
+};
+
+export const sortEventsByRecency = (posts: (PrimalNote | PrimalUserPoll)[], reverse = false) => {
+  return posts.sort((a: PrimalNote | PrimalUserPoll, b: PrimalNote | PrimalUserPoll) => {
+    const order = b.msg.created_at - a.msg.created_at;
+
+    return reverse ? -1 * order : order;
+  });
 };
 
 export const sortByRecency = (posts: PrimalNote[], reverse = false) => {

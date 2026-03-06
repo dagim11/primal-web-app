@@ -47,7 +47,7 @@ const EventPage: Component = () => {
           return;
         }
 
-        if (content.kind === Kind.Text) {
+        if (content.kind === Kind.Text || content.kind === Kind.UserPoll) {
           const eventPointer: nip19.EventPointer ={
             id: content.id,
             author: content.pubkey,

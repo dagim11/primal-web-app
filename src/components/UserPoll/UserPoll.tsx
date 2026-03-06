@@ -265,6 +265,14 @@ const UserPoll: Component<UserPollProps> = (props) => {
     );
   }
 
+  const noteLinkId = () => {
+    try {
+      return `/e/${props.poll.noteIdShort}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   return (
     <div
       id={props.id}
@@ -298,8 +306,9 @@ const UserPoll: Component<UserPollProps> = (props) => {
                 />
               </div>
 
-              <div
+              <a
                 class={styles.question}
+                href={!props.onClick ? noteLinkId() : ''}
               >
                 <ParsedPoll
                   note={props.poll}
@@ -307,7 +316,7 @@ const UserPoll: Component<UserPollProps> = (props) => {
                   margins={1}
                   footerSize="short"
                 />
-              </div>
+              </a>
 
               <div class={styles.choices}>
                 <Switch>

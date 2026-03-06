@@ -1034,6 +1034,7 @@ export type PrimalUserPoll = {
     score24h: number,
     bookmarks: number,
   },
+  repost?: PrimalRepost,
 };
 
 export type PrimalFeed = {

@@ -4,6 +4,7 @@ import {
   convertToNotes,
   parseEmptyReposts,
   sortByRecency,
+  sortEventsByRecency,
 } from "../stores/note";
 import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
@@ -23,6 +24,7 @@ import {
   NoteActions,
   PrimalNote,
   PrimalUser,
+  PrimalUserPoll,
   TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
@@ -30,11 +32,12 @@ import { getEventQuoteStats, getEventZaps, parseLinkPreviews } from "../lib/note
 import { handleSubscription, parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
 import { accountStore } from "../stores/accountStore";
+import { fetchMultiThread } from "../megaFeeds";
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
   noteId: string;
-  notes: PrimalNote[],
+  notes: (PrimalNote | PrimalUserPoll)[],
   users: PrimalUser[],
   isFetching: boolean,
   isFetchingTopZaps: boolean,
@@ -103,23 +106,37 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
-  const fetchNotes = (noteId: string, until = 0, limit = 100) => {
-    clearNotes();
-    updateStore('noteId', noteId)
-
-    const threadId = `thread_${APP_ID}`;
-
-    handleSubscription(
-      threadId,
-      () => getThread(accountStore.publicKey, noteId, threadId),
-      handleThreadEvent,
-      handleThreadEose,
-    )
-
-    fetchTopZaps(noteId);
-    fetchNoteQuoteStats(noteId);
+  const fetchNotes = async (noteId: string, until = 0, limit = 100) => {
     updateStore('isFetching', () => true);
+    const { notes, userPolls, users } = await fetchMultiThread(
+      accountStore.publicKey,
+      noteId,
+    );
+
+    const sorted = sortEventsByRecency([...notes, ...userPolls]);
+
+    updateStore('notes', () => [ ...sorted ]);
+    updateStore('users', () => [ ...users ]);
+    updateStore('isFetching', () => false);
   }
+
+  // const fetchNotes = (noteId: string, until = 0, limit = 100) => {
+  //   clearNotes();
+  //   updateStore('noteId', noteId)
+
+  //   const threadId = `thread_${APP_ID}`;
+
+  //   handleSubscription(
+  //     threadId,
+  //     () => getThread(accountStore.publicKey, noteId, threadId),
+  //     handleThreadEvent,
+  //     handleThreadEose,
+  //   )
+
+  //   fetchTopZaps(noteId);
+  //   fetchNoteQuoteStats(noteId);
+  //   updateStore('isFetching', () => true);
+  // }
 
   const insertNote = (note: PrimalNote) => {
     updateStore('notes', (nts) => [ { ...note }, ...nts]);

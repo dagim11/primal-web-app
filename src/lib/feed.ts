@@ -3,6 +3,7 @@ import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "../lib/nTools";
 import { Kind, day, hour } from "../constants";
 import { noteIdToHex } from "./keys";
+import { APP_ID } from "../App";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
   if (!pubkey) {
@@ -333,6 +334,28 @@ export const getFutureUserFeed = (
     {cache: ["feed", payload]},
   ]));
 };
+
+export const getMultiThread = (user_pubkey: string | undefined, postId: string, subId: string, until = 0, limit = 100) => {
+
+  let event_id = postId.startsWith('nevet1') ? noteIdToHex(postId) : postId;
+
+  if (event_id.length === 0) {
+    return;
+  }
+
+  let payload:  { user_pubkey?: string, limit: number, event_id: string, until?: number, kinds: number[] } =
+    { event_id, limit, kinds: [1,6,1068, 6969] } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["multi_kind_thread_view", payload]},
+  ]));
+}
 
 export const getThread = (user_pubkey: string | undefined, postId: string, subid: string, until = 0, limit = 100) => {
 
