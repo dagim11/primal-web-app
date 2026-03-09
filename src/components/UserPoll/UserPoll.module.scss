@@ -298,148 +298,358 @@
   }
 }
 
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 
-      .choices {
+  .choice {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--subtile-devider);
+    background: var(--background-input);
+
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .choiceResult {
+    position: relative;
+    width: 100%;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0;
+
+    &.locked {
+      cursor: default;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: calc(100% - 64px);
+      height: 32px;
+      .label {
+        position: relative;
+        z-index: 1;
+        padding-left: 12px;
+
         display: flex;
-        flex-direction: column;
+        align-items: center;
         gap: 6px;
 
-        .choice {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 8px 12px;
-          border-radius: 99px;
-          border: 1px solid var(--subtile-devider);
-          background: var(--background-input);
-
+        .text {
           color: var(--text-primary);
-          text-align: center;
           font-size: 15px;
           font-weight: 400;
           line-height: 20px;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          line-clamp: 1;
+          -webkit-box-orient: vertical;
+          text-align: left;
         }
 
-        .choiceResult {
-          position: relative;
-          width: 100%;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 2px 0;
 
-          &.locked {
-            cursor: default;
-          }
+        .check {
+          width: 16px;
+          height: 16px;
+          min-width: 16px;
+          border-radius: 99px;
+          flex-grow: 1;
 
-          .option {
-            display: flex;
-            align-items: center;
-            position: relative;
-            width: calc(100% - 64px);
-            height: 32px;
-            .label {
-              position: relative;
-              z-index: 1;
-              padding-left: 12px;
-
-              display: flex;
-              align-items: center;
-              gap: 6px;
-
-              .text {
-                color: var(--text-primary);
-                font-size: 15px;
-                font-weight: 400;
-                line-height: 20px;
-
-                overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 1;
-                line-clamp: 1;
-                -webkit-box-orient: vertical;
-                text-align: left;
-              }
-
-
-              .check {
-                width: 16px;
-                height: 16px;
-                min-width: 16px;
-                border-radius: 99px;
-                flex-grow: 1;
-
-                background-color: var(--text-primary);
-                -webkit-mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
-                mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
-              }
-            }
-
-            .graph {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: var(--percent-width, 0%);
-              height: 32px;
-              border-radius: 6px;
-              background-color: var(--subtile-devider);
-
-              &.highlight {
-                background-color: var(--accent);
-              }
-
-              &.transparent {
-                opacity: 0.5;
-              }
-
-            }
-
-          }
-
-          .number {
-            width: 60px;
-            color: var(--text-primary);
-            text-align: right;
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 20px;
-          }
+          background-color: var(--text-primary);
+          -webkit-mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
+          mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
         }
       }
 
-      .pollStats {
+      .graph {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--percent-width, 0%);
+        height: 32px;
+        border-radius: 6px;
+        background-color: var(--subtile-devider);
+
+        &.highlight {
+          background-color: var(--accent);
+        }
+
+        &.transparent {
+          opacity: 0.5;
+        }
+
+      }
+
+    }
+
+    .number {
+      width: 60px;
+      color: var(--text-primary);
+      text-align: right;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+  }
+}
+
+.pollStats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+
+  div {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 16px;
+  }
+
+  button {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 16px;
+    width: fit-content;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:disabled {
+      opacity: 1;
+      color: var(--text-tertiary);
+    }
+  }
+}
+
+
+.voteChoices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(640px, 100dvw);
+
+  .voteChoice {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 8px 8px;
+    border-radius: 8px;
+
+    &.highlight {
+      border: 1px solid var(--accent);
+      background-color: var(--background-header-input);
+    }
+
+    &:disabled {
+      opacity: 1;
+      .moreVotes {
+        display: none;
+      }
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      position: relative;
+      width: calc(100% - 64px);
+      height: 32px;
+      .label {
+        position: relative;
+        z-index: 1;
+        padding-left: 12px;
+
         display: flex;
         align-items: center;
-        gap: 4px;
-        padding: 6px 4px;
+        gap: 6px;
 
-        div {
-          color: var(--text-tertiary);
-          font-size: 14px;
-          font-weight: 800;
-          line-height: 16px;
+        .text {
+          color: var(--text-primary);
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 20px;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          line-clamp: 1;
+          -webkit-box-orient: vertical;
+          text-align: left;
         }
 
-        button {
-          margin: 0;
-          padding: 0;
-          border: none;
-          outline: none;
-          color: var(--accent);
-          font-size: 14px;
-          font-weight: 800;
-          line-height: 16px;
-          width: fit-content;
 
-          &:hover {
-            text-decoration: underline;
-          }
+        .check {
+          width: 16px;
+          height: 16px;
+          min-width: 16px;
+          border-radius: 99px;
+          flex-grow: 1;
 
-          &:disabled {
-            opacity: 1;
-            color: var(--text-tertiary);
-          }
+          background-color: var(--text-primary);
+          -webkit-mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
+          mask: url(../../assets/icons/check_poll.svg) 0 / 100% no-repeat;
         }
       }
+
+      .graph {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--percent-width, 0%);
+        height: 32px;
+        border-radius: 6px;
+        background-color: var(--subtile-devider);
+
+        &.highlight {
+          background-color: var(--accent);
+        }
+
+        &.transparent {
+          opacity: 0.5;
+        }
+
+      }
+
+    }
+
+    .number {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      height: 32px;
+      width: 62px;
+
+      >div {
+        color: var(--text-secondary);
+        text-align: right;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 16px;
+      }
+      .moreVotes {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16px;
+      }
+    }
+  }
+}
+
+.voteStats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+
+  div {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 16px;
+  }
+
+  button {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    width: fit-content;
+  }
+}
+
+.voteListDevider {
+  padding: 0 8px 8px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid var(--subtile-devider);
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+.voteList {
+  height: 360px;
+  overflow-y: scroll;
+
+  .voteDetails {
+    padding: 10px 6px;
+    display: flex;
+    gap: 12px;
+
+    .postInfo {
+      display: flex;
+      flex-direction: column;
+      font-size: 16px;
+      line-height: 18px;
+      font-weight: 400;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 2px;
+
+      .verification {
+        max-width: 100%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 16px;
+
+      }
+      .userInfo {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        overflow: hidden;
+        gap: 4px;
+
+        .userName {
+          max-width: 100%;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+
+          color: var(--text-primary);
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 16px;
+        }
+      }
+    }
+  }
+}
