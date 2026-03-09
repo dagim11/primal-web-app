@@ -71,7 +71,7 @@ const VotesModal: Component<{
   const fetchVotes = async (id: string, option: string) => {
     const poll = props.poll;
     if (!poll || !poll.choices || poll.choices.length < 1) return;
-    const { pollVotes } = await getPollVotes(id, option, {
+    const { pollVotes } = await getPollVotes(id, option, `poll_votes_${id}_${APP_ID}`, {
       limit: 20,
     });
 
@@ -82,7 +82,9 @@ const VotesModal: Component<{
     const poll = props.poll;
     if (!poll || !poll.choices || poll.choices.length < 1) return;
 
-    const { pollVotes } = await getPollVotes(id, option, {
+    if (votes.length === 0) return;
+
+    const { pollVotes } = await getPollVotes(id, option, `poll_votes_np_${id}_${APP_ID}`, {
       limit: 20,
       offset: votes.length,
     });
@@ -242,7 +244,7 @@ const VotesModal: Component<{
             )}
           </For>
           <Paginator
-            loadNextPage={fetchVotesNextPage}
+            loadNextPage={() => fetchVotesNextPage(props.poll?.id || '', selectedChoice())}
             isSmall={true}
           />
         </div>

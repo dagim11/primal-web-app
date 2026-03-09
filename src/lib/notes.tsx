@@ -894,8 +894,8 @@ export type PollVote = {
   response: string,
 }
 
-export const getPollVotes = (pollId: string, option: string, paging?: FeedPaging) => {
-  const subId = `poll_votes_${pollId}_${APP_ID}`;
+export const getPollVotes = (pollId: string, option: string, subId: string, paging?: FeedPaging) => {
+
   return new Promise<MegaFeedResults>((resolve) => {
     let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
