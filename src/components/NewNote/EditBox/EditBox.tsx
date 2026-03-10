@@ -656,7 +656,9 @@ const EditBox: Component<{
         return newMsg;
       });
 
-      updateMediaTags([...mTags]);
+      if (mTags) {
+        updateMediaTags([...mTags]);
+      }
 
       if (accountStore.quotedNote) {
         addQuote(accountStore.quotedNote);
@@ -674,7 +676,9 @@ const EditBox: Component<{
 
       setPollState(() => ({...draft}));
 
-      updateMediaTags([...mTags]);
+      if (mTags) {
+        updateMediaTags([...mTags]);
+      }
 
       if (accountStore.quotedNote) {
         addQuote(accountStore.quotedNote);
@@ -1051,7 +1055,7 @@ const EditBox: Component<{
       tags = [...tags, ...relayTags, ...mediaTagsToAdd, ...pollTags];
 
       if (pollState.pollKind === Kind.ZapPoll && accountStore.publicKey) {
-        tags = [['p', accountStore.publicKey], ...tags];
+        tags = [['p', accountStore.publicKey, accountStore.activeRelays[0]], ...tags];
       }
 
       setIsPostingInProgress(true);
