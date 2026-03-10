@@ -23,15 +23,11 @@ const NoteReplyHeader: Component<{
     const mentionedReads = props.note.mentionedArticles;
     const mentionedUserPolls = props.note.mentionedUserPolls;
 
-    console.log('REPLY HEADER: ', replyTo, mentionedUserPolls);
-
     if (replyTo && mentions && mentions[replyTo]) {
-      console.log('M NOTE')
       return mentions[replyTo].user || props.defaultParentAuthor;
     }
 
     if (replyTo && mentionedReads && mentionedReads[replyTo]) {
-      console.log('M READ')
       const [kind, pubkey, identifier] = replyTo.split(':');
 
       try {

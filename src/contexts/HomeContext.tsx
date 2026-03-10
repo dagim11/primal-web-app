@@ -220,7 +220,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const spec = JSON.stringify(specJson);
 
-    const { notes, userPolls, paging } = await fetchMegaMultiFeed(
+    const { notes, userPolls, zapPolls, paging } = await fetchMegaMultiFeed(
       pubkey,
       spec,
       `home_feed_${APP_ID}`,
@@ -232,7 +232,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       },
     );
 
-    const sortedEvents = filterAndSortEvents([...notes, ...userPolls], paging);
+    const sortedEvents = filterAndSortEvents([...notes, ...userPolls, ...zapPolls], paging);
 
     // const sortedNotes = filterAndSortNotes(notes, paging);
 

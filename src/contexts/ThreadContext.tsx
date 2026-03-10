@@ -108,12 +108,14 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
   const fetchNotes = async (noteId: string, until = 0, limit = 100) => {
     updateStore('isFetching', () => true);
-    const { notes, userPolls, users } = await fetchMultiThread(
+    const { notes, userPolls, zapPolls, users } = await fetchMultiThread(
       accountStore.publicKey,
       noteId,
     );
 
-    const sorted = sortEventsByRecency([...notes, ...userPolls]);
+    console.log('POLLS: ', noteId, zapPolls);
+
+    const sorted = sortEventsByRecency([...notes, ...userPolls, ...zapPolls]);
 
     updateStore('notes', () => [ ...sorted ]);
     updateStore('users', () => [ ...users ]);

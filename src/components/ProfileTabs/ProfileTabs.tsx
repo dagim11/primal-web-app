@@ -28,6 +28,7 @@ import { scrollWindowTo } from "../../lib/scroll";
 
 import { accountStore, addToAllowlist, removeFromMuteList } from "../../stores/accountStore";
 import UserPoll from "../UserPoll/UserPoll";
+import ZapPoll from "../UserPoll/ZapPoll";
 
 
 const ProfileTabs: Component<{
@@ -499,6 +500,16 @@ const ProfileTabs: Component<{
                             <Match when={note.msg.kind === Kind.UserPoll}>
                               <div class="animated">
                                 <UserPoll
+                                  poll={note}
+                                  onRemove={(id: string) => {
+                                    profile?.actions.removeEvent(id, 'notes');
+                                  }}
+                                />
+                              </div>
+                            </Match>
+                            <Match when={note.msg.kind === Kind.ZapPoll}>
+                              <div class="animated">
+                                <ZapPoll
                                   poll={note}
                                   onRemove={(id: string) => {
                                     profile?.actions.removeEvent(id, 'notes');

@@ -46,6 +46,7 @@ import { fetchReadThread } from "../megaFeeds";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { accountStore } from "../stores/accountStore";
 import UserPoll from "../components/UserPoll/UserPoll";
+import ZapPoll from "../components/UserPoll/ZapPoll";
 
 export type LongFormData = {
   title: string,
@@ -1175,6 +1176,11 @@ const Longform: Component< { naddr: string } > = (props) => {
                     </Match>
                     <Match  when={reply?.msg.kind === Kind.UserPoll}>
                       <UserPoll
+                        poll={reply}
+                      />
+                    </Match>
+                    <Match  when={reply?.msg.kind === Kind.ZapPoll}>
+                      <ZapPoll
                         poll={reply}
                       />
                     </Match>

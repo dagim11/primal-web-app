@@ -1079,6 +1079,100 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
 };
 
 
+export const convertToZapPollsMega = (page: MegaFeedPage) => {
+
+  if (page === undefined) {
+    return [];
+  }
+
+  let i = 0;
+
+  let zapPolls: PrimalUserPoll[] = [];
+
+  for (i=0;i<page.zapPolls.length;i++) {
+    const pagePoll = page.zapPolls[i];
+
+    // If this is a repost, parse it for the originsl note.
+    const poll = pagePoll.kind === Kind.Repost ? parseRepost(pagePoll, Kind.ZapPoll) : pagePoll;
+
+    // if this is a repost extract repost info
+    const repost = pagePoll.kind === Kind.Repost ? extractRepostInfo(page, pagePoll) : undefined;
+
+    const author = convertToUser(page.users[poll.pubkey], poll.pubkey);
+    const results = page.pollResults[poll.id];
+    const topZaps = page.topZaps[poll.id] || [];
+    const stats = page.noteStats[poll.id];
+
+
+    const tags = poll.tags || [];
+    const replyTo = extractReplyTo(tags);
+    const endsAt = parseInt((tags.find(t => t[0] === 'closed_at') || ['closed_at', `${now()}`])[1]);
+    const min = parseInt((tags.find(t => t[0] === 'value_minimum') || ['value_minimum', `0`])[1]);
+    const max = parseInt((tags.find(t => t[0] === 'value_maximum') || ['value_maximum', `0`])[1]);
+
+    const choices = poll.tags.reduce<{ id: string, label: string, index: number }[]>(
+      (acc, t, index) => {
+        if (t[0] !== 'poll_option') return acc;
+        return [...acc, { id: t[1], label: t[2], index }];
+      },
+      [],
+    );
+
+    // Parse mentions
+    let {
+      mentionedNotes,
+      mentionedArticles,
+      mentionedUsers,
+      mentionedHighlights,
+      mentionedZaps,
+      mentionedLiveEvents,
+      mentionedUserPolls,
+    } = extractMentions(page, poll);
+
+    const eventPointer: nip19.EventPointer = {
+      id: poll.id,
+      author: poll.pubkey,
+      kind: poll.kind,
+      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
+    };
+
+    const eventPointerShort: nip19.EventPointer = {
+      id: poll.id,
+    };
+
+    const newPoll: PrimalUserPoll = {
+      user: author,
+      msg: poll,
+      mentionedNotes,
+      mentionedUsers,
+      mentionedHighlights,
+      mentionedArticles,
+      mentionedZaps,
+      mentionedLiveEvents,
+      mentionedUserPolls,
+      replyTo: replyTo && replyTo[1],
+      tags: poll.tags,
+      id: poll.id,
+      noteId: nip19.neventEncode(eventPointer),
+      noteIdShort: nip19.neventEncode(eventPointerShort),
+      pubkey: poll.pubkey,
+      question: sanitize(poll.content),
+      choices,
+      results,
+      relayHints: page.relayHints,
+      noteActions: (page.noteActions && page.noteActions[poll.id]) ?? noActions(poll.id),
+      endsAt,
+      topZaps,
+      stats,
+      repost,
+      zapLimits: { min, max },
+    };
+
+    zapPolls.push(newPoll);
+  }
+  return zapPolls;
+};
+
 export const convertToPollVotesMega = (page: MegaFeedPage) => {
 
   if (page === undefined) {

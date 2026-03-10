@@ -35,6 +35,7 @@ import { Kind } from '../constants';
 import { userName } from '../stores/profile';
 import { date } from '../lib/dates';
 import UserPoll from '../components/UserPoll/UserPoll';
+import ZapPoll from '../components/UserPoll/ZapPoll';
 
 
 const Home: Component = () => {
@@ -183,9 +184,9 @@ const Home: Component = () => {
                         />
                       </div>
                     </Match>
-                    <Match when={note.msg.kind === Kind.UserPoll}>
+                    <Match when={note.msg.kind === Kind.ZapPoll}>
                       <div class="animated">
-                        <UserPoll
+                        <ZapPoll
                           poll={note}
                           onRemove={(id: string) => {
                             context?.actions.removeEvent(id, 'notes');

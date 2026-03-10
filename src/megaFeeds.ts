@@ -30,7 +30,7 @@ import {
   UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
-import { convertToDraftsMega, convertToNotesMega, convertToPollVotesMega, convertToReadsMega, convertToUserPollsMega, convertToUsersMega } from "./stores/megaFeed";
+import { convertToDraftsMega, convertToNotesMega, convertToPollVotesMega, convertToReadsMega, convertToUserPollsMega, convertToUsersMega, convertToZapPollsMega } from "./stores/megaFeed";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
@@ -75,6 +75,7 @@ export type MegaFeedResults = {
   drafts: PrimalDraft[],
   zaps: PrimalZap[],
   userPolls: PrimalUserPoll[],
+  zapPolls: PrimalUserPoll[],
   pollVotes: PollVote[],
   topicStats: TopicStat[],
   paging: PaginationInfo,
@@ -133,6 +134,7 @@ export const emptyMegaFeedResults = () => ({
   drafts: [],
   zaps: [],
   userPolls: [],
+  zapPolls: [],
   pollVotes: [],
   topicStats: [],
   dmContacts: [],
@@ -757,6 +759,8 @@ export const pageMultiFeedResolve = (page: MegaFeedPage) => {
   const leaderboard = [ ...page.leaderboard ];
 
   const userPolls = convertToUserPollsMega(page);
+  const zapPolls = convertToZapPollsMega(page);
+  const pollVotes = convertToPollVotesMega(page);
 
   return {
     users,
@@ -765,6 +769,8 @@ export const pageMultiFeedResolve = (page: MegaFeedPage) => {
     drafts,
     zaps,
     userPolls,
+    zapPolls,
+    pollVotes,
     topicStats,
     dmContacts,
     encryptedMessages,
@@ -869,6 +875,7 @@ export const pageResolve = (page: MegaFeedPage) => {
   const leaderboard = [ ...page.leaderboard ];
 
   const userPolls = convertToUserPollsMega(page);
+  const zapPolls = convertToZapPollsMega(page);
   const pollVotes = convertToPollVotesMega(page);
 
   return {
@@ -878,6 +885,7 @@ export const pageResolve = (page: MegaFeedPage) => {
     drafts,
     zaps,
     userPolls,
+    zapPolls,
     pollVotes,
     topicStats,
     dmContacts,
@@ -926,13 +934,13 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
 
     if (isAlreadyReposted) return;
 
-    if (repostedEvent.kind === Kind.Text) {
+    if (repostedEvent?.kind === Kind.Text) {
       page.notes.push({ ...message });
     }
-    if (repostedEvent.kind === Kind.UserPoll) {
+    if (repostedEvent?.kind === Kind.UserPoll) {
       page.userPolls.push({ ...message });
     }
-    if (repostedEvent.kind === Kind.ZapPoll) {
+    if (repostedEvent?.kind === Kind.ZapPoll) {
       page.zapPolls.push({ ...message });
     }
 
@@ -1291,11 +1299,13 @@ const convertToZapsMega = (page: MegaFeedPage) => {
 
       const article = page.reads.find(a => a.id === zappedId);
       const note = page.notes.find(n => n.id === zappedId);
+      const zapPolls = page.zapPolls.find(n => n.id === zappedId);
+      const userPolls = page.userPolls.find(n => n.id === zappedId);
 
-      zappedKind = article?.kind || note?.kind || 0;
+      zappedKind = article?.kind || note?.kind || zapPolls?.kind  || userPolls?.kind || 0;
     }
 
-    if (![Kind.Text, Kind.LongForm].includes(zappedKind)) continue;
+    if (![Kind.Text, Kind.LongForm, Kind.UserPoll, Kind.ZapPoll].includes(zappedKind)) continue;
 
     const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
     const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;

@@ -1038,6 +1038,45 @@ export type PrimalUserPoll = {
     bookmarks: number,
   },
   repost?: PrimalRepost,
+  zapLimits?: { min: number, max: number},
+};
+
+
+export type PrimalZapPoll = {
+  user: PrimalUser,
+  msg: NostrNoteContent,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedUsers?: Record<string, PrimalUser>,
+  mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedZaps?: Record<string, PrimalZap>,
+  mentionedHighlights?: Record<string, any>,
+  mentionedLiveEvents?: Record<string, StreamingData>,
+  mentionedUserPolls?: Record<string, PrimalUserPoll>,
+  replyTo?: string,
+  id: string,
+  pubkey: string,
+  noteId: string,
+  noteIdShort: string,
+  tags: string[][],
+  question: string,
+  choices: PrimalPollChoice[],
+  results: PollResults,
+  relayHints?: Record<string, string>,
+  noteActions: NoteActions,
+  endsAt: number,
+  topZaps: TopZap[],
+  stats: {
+    likes: number,
+    mentions: number,
+    reposts: number,
+    replies: number,
+    zaps: number,
+    satszapped: number,
+    score: number,
+    score24h: number,
+    bookmarks: number,
+  },
+  repost?: PrimalRepost,
 };
 
 export type PrimalFeed = {

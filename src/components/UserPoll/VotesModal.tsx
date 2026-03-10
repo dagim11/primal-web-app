@@ -14,6 +14,7 @@ import {
   getEventReactions,
   getEventZaps,
   getPollVotes,
+  getZapPollVotes,
   parseLinkPreviews,
   PollVote,
 } from '../../lib/notes';
@@ -71,11 +72,26 @@ const VotesModal: Component<{
   const fetchVotes = async (id: string, option: string) => {
     const poll = props.poll;
     if (!poll || !poll.choices || poll.choices.length < 1) return;
-    const { pollVotes } = await getPollVotes(id, option, `poll_votes_${id}_${APP_ID}`, {
-      limit: 20,
-    });
 
-    setVotes(pollVotes);
+    if (props.poll?.msg.kind === Kind.UserPoll) {
+      const { pollVotes } = await getPollVotes(id, option, `poll_votes_${id}_${APP_ID}`, {
+        limit: 20,
+      });
+
+      setVotes(pollVotes);
+      return;
+    }
+
+    if (props.poll?.msg.kind === Kind.ZapPoll) {
+      const pollVotes = await getZapPollVotes(id, option, `poll_zap_votes_${id}_${APP_ID}`, {
+        limit: 20,
+      });
+
+      setVotes(pollVotes);
+      return;
+    }
+
+    // setVotes(vs);
   }
 
   const fetchVotesNextPage = async (id: string, option: string) => {
@@ -84,12 +100,23 @@ const VotesModal: Component<{
 
     if (votes.length === 0) return;
 
-    const { pollVotes } = await getPollVotes(id, option, `poll_votes_np_${id}_${APP_ID}`, {
-      limit: 20,
-      offset: votes.length,
-    });
 
-    setVotes(v => [ ...v, ...pollVotes]);
+    if (props.poll?.msg.kind === Kind.UserPoll) {
+      const { pollVotes } = await getPollVotes(id, option, `poll_votes_np_${id}_${APP_ID}`, {
+        limit: 20,
+        offset: votes.length,
+      });
+      setVotes(v => [ ...v, ...pollVotes]);
+      return;
+    }
+    if (props.poll?.msg.kind === Kind.ZapPoll) {
+      const pollVotes = await getZapPollVotes(id, option, `poll_zap_votes_np_${id}_${APP_ID}`, {
+        limit: 20,
+        offset: votes.length,
+      });
+      setVotes(v => [ ...v, ...pollVotes]);
+      return;
+    }
   }
 
 

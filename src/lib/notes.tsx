@@ -4,7 +4,7 @@ import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
 import { EventCoordinate, MediaSize, MegaFeedPage, NostrNoteContent, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalPollChoice, PrimalUser, PrimalUserPoll, SendNoteResult } from "../types/primal";
-import { decodeIdentifier, npubToHex } from "./keys";
+import { decodeIdentifier, hexToNpub, npubToHex } from "./keys";
 import { logError, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
@@ -13,6 +13,7 @@ import { APP_ID, relayWorker } from "../App";
 import { accountStore, dequeEvent, enqueEvent } from "../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 import { emptyMegaFeedPage, emptyMegaFeedResults, FeedPaging, MegaFeedResults, pageResolve, updateFeedPage } from "../megaFeeds";
+import { parseBolt11 } from "../utils";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -939,36 +940,118 @@ export const getPollVotes = (pollId: string, option: string, subId: string, pagi
       {cache: ["poll_votes", { event_id: pollId, option, limit, offset }]},
     ]));
   });
-
-  // return new Promise<PollVote[]>((resolve) => {
-  //   let votes: PollVote[] = [];
-
-  //   const unsub = subsTo(subId, {
-  //     onEvent: (_,event) => {
-  //       if (event.kind === Kind.UserPollVote) {
-  //         console.log('VOTE: ', event.pubkey)
-  //       }
-  //       if (event.kind === Kind.Metadata) {
-  //         console.log('User: ', event)
-  //       }
-  //     },
-  //     onEose: () => {
-  //       unsub();
-  //       resolve(votes);
-  //     },
-  //     onNotice: () => {
-  //       unsub();
-  //       resolve([]);
-  //     }
-  //   })
-
-  //   sendMessage(JSON.stringify([
-  //     "REQ",
-  //     subId,
-  //     {cache: ["poll_votes", { event_id: pollId, limit, offset }]},
-  //   ]));
-  // })
 };
+
+
+export const getZapPollVotes = (pollId: string, option: string, subId: string, paging?: FeedPaging) => {
+
+  return new Promise<PollVote[]>((resolve) => {
+
+    const users: Record<string, any> = {};
+    const zaps: any[] = [];
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content?.kind === Kind.Metadata) {
+          let user = JSON.parse(content.content);
+
+          if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+            user.displayName = user.display_name;
+          }
+          user.pubkey = content.pubkey;
+          user.npub = hexToNpub(content.pubkey);
+          user.created_at = content.created_at;
+
+          users[content.pubkey] = { ...user };
+
+          return;
+        }
+
+        if (content?.kind === Kind.Zap) {
+          const zapTag = content.tags.find(t => t[0] === 'description');
+
+          if (!zapTag) return;
+
+          const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+          let amount = '0';
+
+          let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+          if (bolt11Tag) {
+            try {
+              amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+            } catch (e) {
+              const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+              amount = amountTag ? amountTag[1] : '0';
+            }
+          }
+
+          zaps.push({
+            amount,
+            pubkey: zapInfo.pubkey,
+            receiver: (zapInfo.tags.find((t: string[]) => t[0] === 'p') || ['p', ''])[1],
+            message: zapInfo.content,
+            tags: [ ...zapInfo.tags ],
+            msg: { ...zapInfo },
+          })
+
+          return;
+        }
+      },
+      onEose: () => {
+        const zapData = zaps.map((zap => ({
+          ...zap,
+          amount: parseInt(zap.amount || '0'),
+          sender: users[zap.pubkey],
+        })));
+
+        const pollVotes: PollVote[] = zaps.reduce<PollVote[]>((acc, zap) => {
+          const vote: PollVote = {
+            user: users[zap.pubkey],
+            msg: {...zap.msg},
+            tags: [...zap.tags],
+            id: zap.msg.id,
+            pubkey: zap.receiver,
+            response: (zap.tags.find((t: string[]) => t[0] === 'poll_option') || ['poll_option', ''])[1],
+          };
+
+          return [...acc, vote];
+        }, []);
+
+        resolve(pollVotes)
+        unsub();
+      },
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["poll_votes", { event_id: pollId, option, limit, offset }]},
+    ]));
+  });
+}
 
 export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
   let event_id: string | undefined = eventId;

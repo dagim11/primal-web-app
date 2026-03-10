@@ -302,7 +302,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       updateStore('isFetching', () => true);
 
-      const { notes, userPolls, paging } = await fetchMegaMultiFeed(
+      const { notes, userPolls, zapPolls, paging } = await fetchMegaMultiFeed(
         accountStore.publicKey,
         JSON.stringify(specification),
         `profile_notes_${APP_ID}`,
@@ -313,7 +313,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         },
       );
 
-      const sortedEvents = filterAndSortEvents([...notes, ...userPolls], paging);
+      const sortedEvents = filterAndSortEvents([...notes, ...userPolls, ...zapPolls], paging);
 
       updateStore('paging', 'notes', () => ({ ...paging }));
       updateStore('notes', (ns) => [ ...ns, ...(sortedEvents as (PrimalNote | PrimalUserPoll)[])]);

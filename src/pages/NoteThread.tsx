@@ -27,6 +27,7 @@ import { useToastContext } from '../components/Toaster/Toaster';
 import { accountStore, hasPublicKey } from '../stores/accountStore';
 import { Kind } from '../constants';
 import UserPoll from '../components/UserPoll/UserPoll';
+import ZapPoll from '../components/UserPoll/ZapPoll';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -162,7 +163,6 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     highlightRefs: Record<string, any>,
     relayHints: Record<string, string>,
   }) => {
-    console.log('POSTED: ', result);
     const pNote = primaryNote();
     if (!meta || !result.note || !accountStore.activeUser || !pNote ) return;
 
@@ -173,11 +173,17 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     const subId = `posted_note_${APP_ID}`;
 
-    const { notes, userPolls } = await fetchEvents(accountStore.publicKey, [result.note.id], subId);
+    const { notes, userPolls, zapPolls } = await fetchEvents(accountStore.publicKey, [result.note.id], subId);
 
-    console.log('EVENTS: ', userPolls);
+    let event: PrimalNote | PrimalUserPoll | undefined = notes[0];
 
-    const event = result.note.kind === Kind.UserPoll ? userPolls[0] : notes[0];
+    if (result.note.kind === Kind.UserPoll) {
+      event = userPolls[0];
+    }
+
+    if (result.note.kind === Kind.ZapPoll) {
+      event = zapPolls[0];
+    }
 
     threadContext?.actions.insertNote(event);
   };
@@ -251,6 +257,11 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                           poll={note}
                         />
                       </Match>
+                      <Match  when={note?.msg.kind === Kind.ZapPoll}>
+                        <ZapPoll
+                          poll={note}
+                        />
+                      </Match>
                     </Switch>
                   }
                 </For>
@@ -290,6 +301,12 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         pollType="primary"
                       />
                     </Match>
+                    <Match  when={primaryNote()?.msg.kind === Kind.ZapPoll}>
+                      <ZapPoll
+                        poll={primaryNote()}
+                        pollType="primary"
+                      />
+                    </Match>
                   </Switch>
 
                   <Show when={hasPublicKey()}>
@@ -320,6 +337,11 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         </Match>
                         <Match  when={note.msg.kind === Kind.UserPoll}>
                           <UserPoll
+                            poll={note}
+                          />
+                        </Match>
+                        <Match  when={note.msg.kind === Kind.ZapPoll}>
+                          <ZapPoll
                             poll={note}
                           />
                         </Match>
