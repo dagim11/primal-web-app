@@ -922,8 +922,6 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       repostedEvent = JSON.parse(message.content);
     } catch {}
 
-    console.log('REPOST: ', repostedEvent, message)
-
     let isAlreadyReposted = isRepostInCollection(page.notes, message);
 
     if (isAlreadyReposted) return;

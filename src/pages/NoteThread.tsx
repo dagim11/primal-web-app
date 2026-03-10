@@ -93,7 +93,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       return [];
     }
 
-    return threadContext?.notes.filter(n =>
+    return threadContext?.notes?.filter(n =>
       n.id !== note.id &&
       // n.created_at >= note.created_at &&
       n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),

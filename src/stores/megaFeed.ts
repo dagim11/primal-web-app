@@ -160,6 +160,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
   let mentionedArticles: Record<string, PrimalArticle> = {};
   let mentionedLiveEvents: Record<string, StreamingData> = {};
   let mentionedZaps: Record<string, PrimalZap> = {};
+  let mentionedUserPolls: Record<string, PrimalUserPoll> = {};
 
   for (let i = 0;i<mentionIds.length;i++) {
     let mentionId = mentionIds[i];
@@ -394,6 +395,68 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
 
       mentionedLiveEvents[naddr] = { ...streamData };
     }
+
+
+    if ([Kind.UserPoll].includes(mention.kind)) {
+
+      const eventPointer: nip19.EventPointer ={
+        id: mention.id,
+        author: mention.pubkey,
+        kind: mention.kind,
+        relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+      }
+
+      const eventPointerShort: nip19.EventPointer ={
+        id: mention.id,
+      }
+
+      let noteId = mention.id;
+      let noteIdShort = mention.id;
+
+      try {
+        noteId = nip19.neventEncode(eventPointer);
+        noteIdShort = nip19.neventEncode(eventPointerShort);
+      } catch (e) {
+        logError('ERROR encoding nevent: ', eventPointer)
+      }
+
+
+      const choices = mention.tags.reduce<{ id: string, label: string, index: number }[]>(
+        (acc, t, index) => {
+          if (t[0] !== 'option') return acc;
+          return [...acc, { id: t[1], label: t[2], index }];
+        },
+        [],
+      );
+      const results = page.pollResults[mention.id];
+
+      const endsAt = parseInt((mention.tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
+      const stats = page.noteStats[mention.id];
+
+      mentionedUserPolls[mentionId] = {
+        user: mentionedUsers[mention.pubkey],
+        msg: { ...mention },
+        mentionedNotes,
+        mentionedUsers:  {...pageUsers},
+        mentionedHighlights,
+        mentionedArticles,
+        mentionedZaps,
+        mentionedLiveEvents,
+        id: mention.id,
+        tags: mention.tags,
+        noteId: nip19.neventEncode(eventPointer),
+        noteIdShort: nip19.neventEncode(eventPointerShort),
+        pubkey: mention.pubkey,
+        question: sanitize(mention.content),
+        choices,
+        results,
+        relayHints: page.relayHints,
+        noteActions: (page.noteActions && page.noteActions[mention.id]) ?? noActions(mention.id),
+        endsAt,
+        topZaps,
+        stats,
+      };
+    }
   }
 
   if (userMentionIds && userMentionIds.length > 0) {
@@ -424,6 +487,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
     mentionedHighlights,
     mentionedZaps,
     mentionedLiveEvents,
+    mentionedUserPolls,
   };
 }
 
@@ -510,6 +574,7 @@ export const convertSingleNoteMega = (pageNote: NostrNoteContent, page: MegaFeed
       mentionedHighlights,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
     } = extractMentions(page, note);
 
     const eventPointer: nip19.EventPointer = {
@@ -554,6 +619,7 @@ export const convertSingleNoteMega = (pageNote: NostrNoteContent, page: MegaFeed
       mentionedArticles,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
       replyTo: replyTo && replyTo[1],
       tags: note.tags,
       id: note.id,
@@ -602,6 +668,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       mentionedHighlights,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
     } = extractMentions(page, note);
 
     const eventPointer: nip19.EventPointer = {
@@ -646,6 +713,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       mentionedArticles,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
       replyTo: replyTo && replyTo[1],
       tags: note.tags,
       id: note.id,
@@ -691,6 +759,7 @@ export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage
     mentionedHighlights,
     mentionedZaps,
     mentionedLiveEvents,
+    mentionedUserPolls,
   } = extractMentions(page, read, naddrShort);
 
   const published = read.tags.reduce<number>((acc, t) => {
@@ -725,6 +794,7 @@ export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage
     mentionedArticles,
     mentionedZaps,
     mentionedLiveEvents,
+    mentionedUserPolls,
     wordCount,
     noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
     bookmarks: stat?.bookmarks || 0,
@@ -805,6 +875,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedHighlights,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
     } = extractMentions(page, read, naddrShort);
 
     const published = read.tags.reduce<number>((acc, t) => {
@@ -839,6 +910,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedArticles,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
       wordCount,
       noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
       bookmarks: stat?.bookmarks || 0,
@@ -942,7 +1014,7 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
 
     const tags = poll.tags || [];
     const replyTo = extractReplyTo(tags);
-    const endsAt = parseInt((poll.tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
+    const endsAt = parseInt((tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
 
     const choices = poll.tags.reduce<{ id: string, label: string, index: number }[]>(
       (acc, t, index) => {
@@ -960,6 +1032,7 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
       mentionedHighlights,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
     } = extractMentions(page, poll);
 
     const eventPointer: nip19.EventPointer = {
@@ -982,6 +1055,7 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
       mentionedArticles,
       mentionedZaps,
       mentionedLiveEvents,
+      mentionedUserPolls,
       replyTo: replyTo && replyTo[1],
       tags: poll.tags,
       id: poll.id,
