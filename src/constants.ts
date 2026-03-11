@@ -1,6 +1,6 @@
 import { ContentModeration, FeedPage, LnbcInvoice, } from "./types/primal";
-import logoFire from './assets/icons/logo_fire.svg';
-import logoIce from './assets/icons/logo_ice.svg';
+// import logoFire from './assets/icons/logo_fire.svg';
+import logoIce from './assets/icons/logo_blue.svg';
 
 export const second = 1000;
 export const minute = 60 * second;
@@ -26,17 +26,17 @@ export const trendingFeed = {
 };
 
 export const themes = [
-  {
-    name: 'sunset',
-    label: 'sunset wave',
-    logo: logoFire,
-    dark: true,
-  },
-  {
-    name: 'sunrise',
-    label: 'sunrise wave',
-    logo: logoFire,
-  },
+  // {
+  //   name: 'sunset',
+  //   label: 'sunset wave',
+  //   logo: logoFire,
+  //   dark: true,
+  // },
+  // {
+  //   name: 'sunrise',
+  //   label: 'sunrise wave',
+  //   logo: logoFire,
+  // },
   {
     name: 'midnight',
     label: 'midnight wave',

@@ -1,81 +1,81 @@
-@mixin sunset_wave {
-  --brand-text: #D5D5D5;
+// @mixin sunset_wave {
+//   --brand-text: #D5D5D5;
 
-  --background-site: #000000;
-  --background-card: #000000;
-  --background-input: #222222;
-  --background-sheet: #121212;
-  --background-header-input: #1a1a1a;
+//   --background-site: #000000;
+//   --background-card: #000000;
+//   --background-input: #222222;
+//   --background-sheet: #121212;
+//   --background-header-input: #1a1a1a;
 
-  --devider: #222222;
+//   --devider: #222222;
 
-  --text-primary: #ffffff;
-  --text-primary-button: #ffffff;
-  --text-secondary: #aaaaaa;
-  --text-secondary-2: #aaaaaa;
-  --text-tertiary: #757575;
-  --text-tertiary-2: #666666;
+//   --text-primary: #ffffff;
+//   --text-primary-button: #ffffff;
+//   --text-secondary: #aaaaaa;
+//   --text-secondary-2: #aaaaaa;
+//   --text-tertiary: #757575;
+//   --text-tertiary-2: #666666;
 
-  --subtile-devider: #444444;
+//   --subtile-devider: #444444;
 
-  --accent: #ca077c;
-  --accent-links: #f800c1;
-  --accent-dm: #ca077c;
-  --accent-pro: #E47C00;
+//   --accent: #ca077c;
+//   --accent-links: #f800c1;
+//   --accent-dm: #ca077c;
+//   --accent-pro: #E47C00;
 
-  --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
+//   --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
 
-  --success-bright: #66E205;
-  --success-dim: #487E1F;
-  --warning-bright: #FA3C3C;
-  --warning-bright-two: #e20505;
-  --warning-bright-shadow: #e2050588;
-  --warning-dim: #480101;
+//   --success-bright: #66E205;
+//   --success-dim: #487E1F;
+//   --warning-bright: #FA3C3C;
+//   --warning-bright-two: #e20505;
+//   --warning-bright-shadow: #e2050588;
+//   --warning-dim: #480101;
 
-  --active-reply: #cccccc;
-  --active-zap: #ffa02f;
-  --active-liked: #f800c1;
-  --active-reposted: #66e205;
-  --active-bookmarked: #0C7DD8;
-  --background-modal: #00000070;
+//   --active-reply: #cccccc;
+//   --active-zap: #ffa02f;
+//   --active-liked: #f800c1;
+//   --active-reposted: #66e205;
+//   --active-bookmarked: #0C7DD8;
+//   --background-modal: #00000070;
 
-  --highlight: #2E3726;
-  --highlight-selected: #516440;
-  --text-highlight: #FFFFFF;
+//   --highlight: #2E3726;
+//   --highlight-selected: #516440;
+//   --text-highlight: #FFFFFF;
 
-  --profile-indicator-border: var(--background-site);
+//   --profile-indicator-border: var(--background-site);
 
-  --check-image: url('./assets/icons/check.svg');
-  --logo: url('./assets/icons/logo_fire.svg');
-  --logo-big: url('./assets/icons/logo_fire_big.svg');
-  --icon-follows: url('./assets/icons/follows.svg');
-  --icon-tribe: url('./assets/icons/tribe.svg');
-  --icon-global: url('./assets/icons/global.svg');
-  --icon-network: url('./assets/icons/network.svg');
+//   --check-image: url('./assets/icons/check.svg');
+//   --logo: url('./assets/icons/logo_fire.svg');
+//   --logo-big: url('./assets/icons/logo_fire_big.svg');
+//   --icon-follows: url('./assets/icons/follows.svg');
+//   --icon-tribe: url('./assets/icons/tribe.svg');
+//   --icon-global: url('./assets/icons/global.svg');
+//   --icon-network: url('./assets/icons/network.svg');
 
-  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+//   --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+//   --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+//   --icon-follows-trending: url('./assets/icons/follows_trending.svg');
 
-  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+//   --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+//   --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+//   --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
 
-  --icon-global-latest: url('./assets/icons/global_latest.svg');
-  --icon-global-popular: url('./assets/icons/global_popular.svg');
-  --icon-global-trending: url('./assets/icons/global_trending.svg');
+//   --icon-global-latest: url('./assets/icons/global_latest.svg');
+//   --icon-global-popular: url('./assets/icons/global_popular.svg');
+//   --icon-global-trending: url('./assets/icons/global_trending.svg');
 
-  --icon-network-latest: url('./assets/icons/network_latest.svg');
-  --icon-network-popular: url('./assets/icons/network_popular.svg');
-  --icon-network-trending: url('./assets/icons/network_trending.svg');
+//   --icon-network-latest: url('./assets/icons/network_latest.svg');
+//   --icon-network-popular: url('./assets/icons/network_popular.svg');
+//   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
-  --reads-placeholder-image: url('./assets/images/reads_image_dark.png');
+//   --reads-placeholder-image: url('./assets/images/reads_image_dark.png');
 
-  select {
-    background-color: var(--background-site);
-  }
+//   select {
+//     background-color: var(--background-site);
+//   }
 
-}
+// }
 
 @mixin midnight_wave {
   --brand-text: #D5D5D5;
@@ -124,8 +124,8 @@
   --profile-indicator-border: var(--background-site);
 
   --check-image: url('./assets/icons/check.svg');
-  --logo: url('./assets/icons/logo_ice.svg');
-  --logo-big: url('./assets/icons/logo_ice_big.svg');
+  --logo: url('./assets/icons/logo_blue.svg');
+  --logo-big: url('./assets/icons/logo_blue_big.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -154,83 +154,82 @@
   }
 }
 
-@mixin sunrise_wave {
-  --brand-text: #444444;
+// @mixin sunrise_wave {
+//   --brand-text: #444444;
 
-  --background-site: #ffffff;
-  --background-card: #ffffff;
-  --background-input: #e5e5e5;
-  --background-sheet: #f5f5f5;
-  --background-header-input: #eeeeee;
+//   --background-site: #ffffff;
+//   --background-card: #ffffff;
+//   --background-input: #e5e5e5;
+//   --background-sheet: #f5f5f5;
+//   --background-header-input: #eeeeee;
 
-  --devider: #e5e5e5;
+//   --devider: #e5e5e5;
 
-  --text-primary: #111111;
-  --text-primary-button: #ffffff;
-  --text-secondary: #666666;
-  --text-secondary-2: #666666;
-  --text-tertiary: #808080;
-  --text-tertiary-2: #808080;
+//   --text-primary: #111111;
+//   --text-primary-button: #ffffff;
+//   --text-secondary: #666666;
+//   --text-secondary-2: #666666;
+//   --text-tertiary: #808080;
+//   --text-tertiary-2: #808080;
 
-  --subtile-devider: #c8c8c8;
+//   --subtile-devider: #c8c8c8;
 
-  --accent: #ca077c;
-  --accent-links: #CA077C;
-  --accent-dm: #CA077C;
-  --accent-pro: #E47C00;
+//   --accent: #ca077c;
+//   --accent-links: #CA077C;
+//   --accent-dm: #CA077C;
+//   --accent-pro: #E47C00;
 
-  --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
+//   --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
 
-  --success-bright: #52CE0A;
-  --success-dim: #569724;
-  --warning-bright: #FA3C3C;
-  --warning-bright-shadow: #C4000088;
-  --warning-dim: #FAC3C3;
+//   --success-bright: #52CE0A;
+//   --success-dim: #569724;
+//   --warning-bright: #FA3C3C;
+//   --warning-bright-shadow: #C4000088;
+//   --warning-dim: #FAC3C3;
 
-  --active-reply: #444444;
-  --active-zap: #ffa02f;
-  --active-liked: #CA079F;
-  --active-reposted: #52CE0A;
-  --active-bookmarked: #0C7DD8;
-  --background-modal: #f5f5f570;
+//   --active-reply: #444444;
+//   --active-zap: #ffa02f;
+//   --active-liked: #CA079F;
+//   --active-reposted: #52CE0A;
+//   --active-bookmarked: #0C7DD8;
+//   --background-modal: #f5f5f570;
 
-  --highlight: #E8F3E8;
-  --highlight-selected: #A3D0A2;
-  --text-highlight: #111111;
+//   --highlight: #E8F3E8;
+//   --highlight-selected: #A3D0A2;
+//   --text-highlight: #111111;
 
-  --profile-indicator-border: var(--accent);
+//   --profile-indicator-border: var(--accent);
 
-  --check-image: url('./assets/icons/check.svg');
-  --logo: url('./assets/icons/logo_fire.svg');
-  --logo-big: url('./assets/icons/logo_fire_big_l.svg');
-  --icon-follows: url('./assets/icons/follows.svg');
-  --icon-tribe: url('./assets/icons/tribe.svg');
-  --icon-global: url('./assets/icons/global.svg');
-  --icon-network: url('./assets/icons/network.svg');
+//   --check-image: url('./assets/icons/check.svg');
+//   --logo: url('./assets/icons/logo_fire.svg');
+//   --logo-big: url('./assets/icons/logo_fire_big_l.svg');
+//   --icon-follows: url('./assets/icons/follows.svg');
+//   --icon-tribe: url('./assets/icons/tribe.svg');
+//   --icon-global: url('./assets/icons/global.svg');
+//   --icon-network: url('./assets/icons/network.svg');
 
-  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+//   --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+//   --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+//   --icon-follows-trending: url('./assets/icons/follows_trending.svg');
 
-  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+//   --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+//   --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+//   --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
 
-  --icon-global-latest: url('./assets/icons/global_latest.svg');
-  --icon-global-popular: url('./assets/icons/global_popular.svg');
-  --icon-global-trending: url('./assets/icons/global_trending.svg');
+//   --icon-global-latest: url('./assets/icons/global_latest.svg');
+//   --icon-global-popular: url('./assets/icons/global_popular.svg');
+//   --icon-global-trending: url('./assets/icons/global_trending.svg');
 
-  --icon-network-latest: url('./assets/icons/network_latest.svg');
-  --icon-network-popular: url('./assets/icons/network_popular.svg');
-  --icon-network-trending: url('./assets/icons/network_trending.svg');
+//   --icon-network-latest: url('./assets/icons/network_latest.svg');
+//   --icon-network-popular: url('./assets/icons/network_popular.svg');
+//   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
-  --reads-placeholder-image: url('./assets/images/reads_image_light.png');
+//   --reads-placeholder-image: url('./assets/images/reads_image_light.png');
 
-  select {
-    background-color: var(--background-site);
-  }
-}
-
+//   select {
+//     background-color: var(--background-site);
+//   }
+// }
 
 @mixin ice_wave {
   --brand-text: #444444;
@@ -279,8 +278,8 @@
   --profile-indicator-border: var(--accent);
 
   --check-image: url('./assets/icons/check.svg');
-  --logo: url('./assets/icons/logo_ice.svg');
-  --logo-big: url('./assets/icons/logo_ice_big_l.svg');
+  --logo: url('./assets/icons/logo_blue.svg');
+  --logo-big: url('./assets/icons/logo_blue_big_dark.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -308,4 +307,12 @@
     background-color: var(--background-site);
   }
 
+}
+
+@mixin sunrise_wave {
+  @include ice_wave();
+}
+
+@mixin sunset_wave {
+  @include midnight_wave();
 }

@@ -17,7 +17,10 @@ const ThemeChooser: Component<{ id?: string }> = (props) => {
 
   createEffect(on(() => accountStore.publicKey, (pubkey, prev) => {
     if (!pubkey || pubkey === prev) return;
-    const selectedTheme = readTheme(pubkey);
+    let selectedTheme = readTheme(pubkey);
+    if (selectedTheme === 'sunset') selectedTheme = 'midnight';
+    if (selectedTheme === 'sunrise') selectedTheme = 'ice';
+
     setCheckedTheme(themes.find(t => t.name === selectedTheme) || themes[1])
   }));
 
