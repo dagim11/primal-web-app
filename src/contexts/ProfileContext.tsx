@@ -295,7 +295,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (tab === 'notes') {
       const specification = {
         id: 'feed',
-        kinds: [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
+        kind: 'notes',
         notes: 'authored',
         pubkey,
       };
@@ -306,6 +306,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         accountStore.publicKey,
         JSON.stringify(specification),
         `profile_notes_${APP_ID}`,
+        [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
         {
           limit,
           until,

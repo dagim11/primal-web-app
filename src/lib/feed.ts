@@ -70,9 +70,18 @@ export const getDrafts = (pubkey: string | undefined, subId: string, until = 0, 
 };
 
 
-export const getMultiFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, since = 0, offset = 0) => {
+export const getMultiFeed = (
+  user_pubkey: string | undefined,
+  spec: string,
+  subid: string,
+  kinds: number[],
+  until = 0,
+  limit = 20,
+  since = 0,
+  offset = 0,
+) => {
 
-  let payload = { spec, limit, offset };
+  let payload = { spec, limit, offset, kinds };
 
   if (until > 0) {
     // @ts-ignore

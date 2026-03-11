@@ -161,7 +161,7 @@ export const uploadMediaConfirm = async (
 };
 
 export const getMediaVariantFromTags = (tags: string[][], url: string) => {
-  const mediaTags = tags.filter(t => t[0] === 'imeta');
+  const mediaTags = (tags || []).filter(t => t[0] === 'imeta');
   const relevantTag = mediaTags.find(t => t.find(p => p === `url ${url}`));
 
   if (!relevantTag) return undefined;

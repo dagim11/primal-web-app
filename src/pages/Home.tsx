@@ -184,6 +184,16 @@ const Home: Component = () => {
                         />
                       </div>
                     </Match>
+                    <Match when={note.msg.kind === Kind.UserPoll}>
+                      <div class="animated">
+                        <UserPoll
+                          poll={note}
+                          onRemove={(id: string) => {
+                            context?.actions.removeEvent(id, 'notes');
+                          }}
+                        />
+                      </div>
+                    </Match>
                     <Match when={note.msg.kind === Kind.ZapPoll}>
                       <div class="animated">
                         <ZapPoll

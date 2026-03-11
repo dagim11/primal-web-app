@@ -178,6 +178,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       accountStore.publicKey,
       spec,
       `home_future_${APP_ID}`,
+      [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
       {
         since,
         limit: 100,
@@ -203,7 +204,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNotes = async (initSpec: string, until = 0, includeIsFetching = true) => {
+  const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
 
     updateStore('isFetching' , () => includeIsFetching);
 
@@ -211,30 +212,19 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const offset = calculateEventsOffset(store.notes, store.paging.notes);
 
-    const specJson = JSON.parse(initSpec) as FeedSpec;
-
-    if (['latest', 'global-trending', 'all-notes'].includes(specJson.id)) {
-      delete specJson.kind;
-      specJson.kinds = [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll]
-    }
-
-    const spec = JSON.stringify(specJson);
-
     const { notes, userPolls, zapPolls, paging } = await fetchMegaMultiFeed(
       pubkey,
       spec,
       `home_feed_${APP_ID}`,
+      [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
       {
         until,
-        // until: 1772535413,
         limit: 20,
         offset,
       },
     );
 
     const sortedEvents = filterAndSortEvents([...notes, ...userPolls, ...zapPolls], paging);
-
-    // const sortedNotes = filterAndSortNotes(notes, paging);
 
     updateStore('paging', 'notes', () => ({ ...paging }));
     updateStore('notes', (ns) => [ ...ns, ...(sortedEvents as (PrimalNote | PrimalUserPoll)[])]);

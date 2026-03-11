@@ -66,7 +66,6 @@ const ZapVote: Component<{
       amount,
     }));
 
-    console.log('VOTE: ', max, min, options, r)
     return r;
   }
 

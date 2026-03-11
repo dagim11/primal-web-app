@@ -192,6 +192,7 @@ export const fetchMegaMultiFeed = (
   pubkey: string | undefined,
   specification: any,
   subId: string,
+  kinds: number[],
   paging?: FeedPaging,
 ) => {
     return new Promise<MegaFeedResults>((resolve) => {
@@ -226,7 +227,7 @@ export const fetchMegaMultiFeed = (
         }
       }
 
-      getMultiFeed(pubkey, specification, subId, until, limit, since, offset);
+      getMultiFeed(pubkey, specification, subId, kinds, until, limit, since, offset);
 
     });
 };

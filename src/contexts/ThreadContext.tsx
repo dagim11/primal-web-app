@@ -113,32 +113,12 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       noteId,
     );
 
-    console.log('POLLS: ', noteId, zapPolls);
-
     const sorted = sortEventsByRecency([...notes, ...userPolls, ...zapPolls]);
 
     updateStore('notes', () => [ ...sorted ]);
     updateStore('users', () => [ ...users ]);
     updateStore('isFetching', () => false);
   }
-
-  // const fetchNotes = (noteId: string, until = 0, limit = 100) => {
-  //   clearNotes();
-  //   updateStore('noteId', noteId)
-
-  //   const threadId = `thread_${APP_ID}`;
-
-  //   handleSubscription(
-  //     threadId,
-  //     () => getThread(accountStore.publicKey, noteId, threadId),
-  //     handleThreadEvent,
-  //     handleThreadEose,
-  //   )
-
-  //   fetchTopZaps(noteId);
-  //   fetchNoteQuoteStats(noteId);
-  //   updateStore('isFetching', () => true);
-  // }
 
   const insertNote = (note: PrimalNote | PrimalUserPoll) => {
     updateStore('notes', (nts) => [ { ...note }, ...nts]);
