@@ -144,7 +144,13 @@ const NoteContextMenu: Component<{
 
   const copyNoteText = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().content}`);
+
+    if ([Kind.UserPoll, Kind.ZapPoll].includes(note().msg.kind)) {
+      navigator.clipboard.writeText(`${note().question ||''}`);
+    } else {
+      navigator.clipboard.writeText(`${note().content}`);
+    }
+
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };

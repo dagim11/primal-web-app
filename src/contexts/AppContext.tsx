@@ -78,7 +78,7 @@ export type VoteZapInfo = {
 };
 
 export type NoteContextMenuInfo = {
-  note: PrimalNote | PrimalArticle,
+  note: PrimalNote | PrimalArticle | PrimalUserPoll,
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
