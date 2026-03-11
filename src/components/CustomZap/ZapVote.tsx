@@ -275,9 +275,9 @@ const ZapVote: Component<{
         <div class={`${styles.limits} ${zapRange().length === 1 ? styles.topMargin : ''}`}>
           <Show
             when={zapRange().length > 1}
-            fallback={<>This poll only allows votes of {humanizeNumber(zapRange()[0].amount || 0)} sats</>}
+            fallback={<>This poll only allows votes of {humanizeNumber(zapRange()[0]?.amount || 0)} sats</>}
           >
-            This poll allows votes between {humanizeNumber(zapRange()[0].amount || 0)} - {humanizeNumber(zapRange()[zapRange().length - 1].amount || 0)} sats
+            This poll allows votes between {humanizeNumber(zapRange()[0]?.amount || 0)} - {humanizeNumber(zapRange()[zapRange().length - 1].amount || 0)} sats
           </Show>
         </div>
 

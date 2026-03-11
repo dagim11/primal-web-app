@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { PollVote, sanitize } from "../lib/notes";
-import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, PrimalZapPoll, TopZap, UserStats } from "../types/primal";
+import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
 import { now, parseBolt11, selectRelayTags } from "../utils";
 import { logError } from "../lib/logger";
@@ -161,7 +161,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
   let mentionedLiveEvents: Record<string, StreamingData> = {};
   let mentionedZaps: Record<string, PrimalZap> = {};
   let mentionedUserPolls: Record<string, PrimalUserPoll> = {};
-  let mentionedZapPolls: Record<string, PrimalZapPoll> = {};
+  let mentionedZapPolls: Record<string, PrimalUserPoll> = {};
 
   for (let i = 0;i<mentionIds.length;i++) {
     let mentionId = mentionIds[i];
@@ -495,6 +495,10 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
       const endsAt = parseInt((mention.tags.find(t => t[0] === 'closed_at') || ['closed_at', `${now()}`])[1]);
       const stats = page.noteStats[mention.id];
 
+      const min = parseInt((mention.tags.find(t => t[0] === 'value_minimum') || ['value_minimum', `0`])[1]);
+      const max = parseInt((mention.tags.find(t => t[0] === 'value_maximum') || ['value_maximum', `0`])[1]);
+
+
       mentionedZapPolls[mentionId] = {
         user: mentionedUsers[mention.pubkey],
         msg: { ...mention },
@@ -517,6 +521,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
         endsAt,
         topZaps,
         stats,
+        zapLimits: { min, max }
       };
     }
   }

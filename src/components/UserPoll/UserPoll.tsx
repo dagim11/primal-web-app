@@ -27,7 +27,7 @@ export type UserPollProps = {
   id: string,
   poll: PrimalUserPoll
   hideContext?: boolean,
-  pollType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread' | 'suggestion',
+  pollType?: 'feed' | 'primary' | 'embedded',
   onRemove?: (id: string, isRepost?: boolean) => void,
 }
 
@@ -96,7 +96,7 @@ const UserPoll: Component<UserPollProps> = (props) => {
   const choicePercent = (id: string) => {
     const results = props.poll.results?.[id];
     if (!results) return didVote() && votedFor() === id ? 100 : 0;
-    const votes = results.votes || 0;
+    const votes = (results.votes || 0) + (didVote()&& votedFor() === id ? 1 : 0);
     const total = totalVotes();
 
     return ((votes/total)*100).toFixed(1);
@@ -119,7 +119,9 @@ const UserPoll: Component<UserPollProps> = (props) => {
     return didVote() ? votedFor() === id : (props.poll.noteActions?.voted_for_option === id);
   }
 
-  const showVoteDetails = () => {
+  const showVoteDetails = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     app?.actions.openVotesModal(props.poll);
   }
 
@@ -379,7 +381,11 @@ const UserPoll: Component<UserPollProps> = (props) => {
                       {choice => (
                         <button
                           class={styles.choice}
-                          onClick={() => doVote(choice)}
+                          onClick={(e: MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            doVote(choice);
+                          }}
                         >
                           {choice.label}
                         </button>
@@ -430,6 +436,143 @@ const UserPoll: Component<UserPollProps> = (props) => {
                 size={'short'}
                 onDelete={() => {}}
               />
+            </div>
+          </div>
+        </div>
+      </Match>
+
+      <Match when={pollType() === 'embedded'}>
+        <div
+          id={props.id}
+          class={styles.userPollEmbedded}
+          data-event={props.poll.msg.id}
+          data-event-bech32={props.poll.noteId}
+          draggable={false}
+        >
+          <div
+            class={styles.userHeader}
+          >
+            <div class={styles.content}>
+              <div class={styles.leftSide}>
+                <a href={app?.actions.profileLink(props.poll.user.npub) || ''}>
+                  <Avatar user={props.poll.user} size="xs" />
+                </a>
+              </div>
+
+              <div class={styles.rightSide}>
+                <div>
+                  <NoteAuthorInfo
+                    author={props.poll.user}
+                    time={props.poll.msg.created_at}
+                  />
+                </div>
+
+                <a
+                  class={styles.question}
+                  href={noteLinkId()}
+                >
+                  <ParsedPoll
+                    note={props.poll}
+                    width={Math.min(510, window.innerWidth - 72)}
+                    margins={1}
+                    footerSize="short"
+                  />
+                </a>
+
+                <div class={styles.choices}>
+                  <Switch>
+                    <Match when={isExpired()}>
+                      <For each={props.poll.choices}>
+                        {choice => (
+                          <button
+                            class={`${styles.choiceResult} ${styles.locked}`}
+                          >
+                            <div class={styles.option}>
+                              <div
+                                class={`${styles.graph} ${['sunrise', 'ice'].includes(settings?.theme || '') ? styles.transparent : ''} ${hasVotedFor(choice.id) ? styles.highlight : ''}`}
+                                style={`--percent-width: ${choicePercent(choice.id)}%`}
+                              >
+                              </div>
+                              <div class={styles.label}>
+                                <div class={styles.text}>
+                                  {choice.label}
+                                </div>
+                                <Show when={winner()[0] === choice.id}>
+                                  <div class={styles.check}></div>
+                                </Show>
+                              </div>
+                            </div>
+                            <div class={styles.number}>
+                              {choicePercent(choice.id)}%
+                            </div>
+                          </button>
+                        )}
+                      </For>
+                    </Match>
+                    <Match when={hasVotedFor(props.poll.noteActions?.voted_for_option || votedFor())}>
+                      <For each={props.poll.choices}>
+                        {choice => (
+                          <button
+                            class={`${styles.choiceResult} ${styles.locked}`}
+                          >
+                            <div class={styles.option}>
+                              <div
+                                class={`${styles.graph} ${['sunrise', 'ice'].includes(settings?.theme || '') ? styles.transparent : ''} ${hasVotedFor(choice.id) ? styles.highlight : ''}`}
+                                style={`--percent-width: ${choicePercent(choice.id)}%`}
+                              ></div>
+                              <div class={styles.label}>
+                                <div class={styles.text}>
+                                  {choice.label}
+                                </div>
+                              </div>
+                            </div>
+                            <div class={styles.number}>
+                              {choicePercent(choice.id)}%
+                            </div>
+                          </button>
+                        )}
+                      </For>
+                    </Match>
+                    <Match when={true}>
+                      <For each={props.poll.choices}>
+                        {choice => (
+                          <button
+                            class={styles.choice}
+                            onClick={(e: MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            doVote(choice);
+                          }}
+                          >
+                            {choice.label}
+                          </button>
+                        )}
+                      </For>
+                    </Match>
+                  </Switch>
+                </div>
+
+                <div class={styles.pollStats}>
+                  <button
+                    class={styles.totalVotes}
+                    onClick={showVoteDetails}
+                    disabled={totalVotes() < 1}
+                  >
+                    {humanizeNumber(totalVotes(), false)} votes
+                  </button>
+                  <Show when={isExpiring()}>
+                    <div>&middot;</div>
+                    <div class={styles.endsTime}>
+                      <Show
+                        when={isExpired()}
+                        fallback={<>{dateFuture(props.poll.endsAt).label} left</>}
+                      >
+                        Final results
+                      </Show>
+                    </div>
+                  </Show>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -544,7 +687,11 @@ const UserPoll: Component<UserPollProps> = (props) => {
                         {choice => (
                           <button
                             class={styles.choice}
-                            onClick={() => doVote(choice)}
+                            onClick={(e: MouseEvent) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              doVote(choice);
+                            }}
                           >
                             {choice.label}
                           </button>

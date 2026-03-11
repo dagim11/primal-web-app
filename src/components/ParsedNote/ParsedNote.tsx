@@ -92,6 +92,8 @@ import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 import NoteVideo from './NoteVideo';
 import { accountStore } from '../../stores/accountStore';
+import UserPoll from '../UserPoll/UserPoll';
+import ZapPoll from '../UserPoll/ZapPoll';
 
 const groupGridLimit = 5;
 
@@ -1476,23 +1478,40 @@ const ParsedNote: Component<{
             ...(props.note.mentionedLiveEvents || {}),
           }
 
+          const mentionedUserPolls = {
+            ...(rn.mentionedUserPolls || {}),
+            ...(props.note.mentionedUserPolls || {}),
+          }
+          const mentionedZapPolls = {
+            ...(rn.mentionedZapPolls || {}),
+            ...(props.note.mentionedZapPolls || {}),
+          }
+
           if (kind === undefined) {
             let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
-              const reEncoded = nip19.naddrEncode({
-                // @ts-ignore
-                kind: eventId.kind,
-                // @ts-ignore
-                pubkey: eventId.pubkey,
-                // @ts-ignore
-                identifier: eventId.identifier || '',
-              });
-              f = mentionedArticles && mentionedArticles[reEncoded];
+              try {
+                const reEncoded = nip19.naddrEncode({
+                  // @ts-ignore
+                  kind: Kind.LongForm,
+                  // @ts-ignore
+                  pubkey: eventId.pubkey,
+                  // @ts-ignore
+                  identifier: eventId.identifier || '',
+                });
+                f = mentionedArticles && mentionedArticles[reEncoded];
+              } catch (e) {}
             }
             if (!f) {
               f = mentionedHighlights && mentionedHighlights[hex];
             }
-            kind = f?.post.kind || f?.msg?.kind || f.event.kind; // || Kind.Text;
+            if (!f) {
+              f = mentionedUserPolls && mentionedUserPolls[hex];
+            }
+            if (!f) {
+              f = mentionedZapPolls && mentionedZapPolls[hex];
+            }
+            kind = f?.msg?.kind || f.event.kind; // || Kind.Text;
           }
 
           if ([Kind.Text].includes(kind || -1)) {
@@ -1669,6 +1688,40 @@ const ParsedNote: Component<{
 
                 // @ts-ignore
                 link = renderLiveEvent(ment, index);
+              }
+            }
+          }
+
+          if (kind === Kind.UserPoll) {
+            if (!props.noLinks) {
+              const ment = mentionedUserPolls && mentionedUserPolls[hex];
+
+              link = unknownMention(id, token);
+
+              if (ment) {
+                link = <div>
+                  <UserPoll
+                    poll={ment}
+                    pollType="embedded"
+                  />
+                </div>;
+              }
+            }
+          }
+
+          if (kind === Kind.ZapPoll) {
+            if (!props.noLinks) {
+              const ment = mentionedZapPolls && mentionedZapPolls[hex];
+
+              link = unknownMention(id, token);
+
+              if (ment) {
+                link = <div>
+                  <ZapPoll
+                    poll={ment}
+                    pollType="embedded"
+                  />
+                </div>;
               }
             }
           }
