@@ -11,17 +11,19 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import Paginator from '../components/Paginator/Paginator';
 import { Kind } from '../constants';
 import { bookmarks as tBookmarks } from '../translations';
-import { PrimalNote, PrimalArticle } from '../types/primal';
-import { calculateNotesOffset, calculateReadsOffset } from '../utils';
+import { PrimalNote, PrimalArticle, PrimalUserPoll } from '../types/primal';
+import { calculateEventsOffset, calculateNotesOffset, calculateReadsOffset } from '../utils';
 import styles from './Bookmarks.module.scss';
 import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
-import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../megaFeeds';
+import { emptyPaging, fetchMegaFeed, fetchMegaMultiFeed, filterAndSortEvents, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../megaFeeds';
 import { useNavigate } from '@solidjs/router';
 import { accountStore } from '../stores/accountStore';
+import UserPoll from '../components/UserPoll/UserPoll';
+import ZapPoll from '../components/UserPoll/ZapPoll';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
-  notes: PrimalNote[],
+  notes: (PrimalNote | PrimalUserPoll)[],
   reads: PrimalArticle[],
   paging: PaginationInfo,
   kind: string,
@@ -69,13 +71,15 @@ const Bookmarks: Component = () => {
   const fetchBookmarks = async (pubkey: string | undefined, until = 0) => {
     if (!pubkey) return;
 
+    updateStore('fetchingInProgress', true);
     const subId = `bookmark_feed_${until}_${APP_ID}`;
 
     const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
 
     const spec = JSON.stringify({
       id: 'feed',
-      kinds: [k, 1068],
+      kind: 'notes',
+      kinds: [k],
       notes: 'bookmarks',
       pubkey,
     });
@@ -85,15 +89,14 @@ const Bookmarks: Component = () => {
     if (kind() === 'reads') {
       offset = calculateReadsOffset(store.reads, store.paging);
     } else if (kind() === 'notes') {
-      offset = calculateNotesOffset(store.notes, store.paging);
+      offset = calculateEventsOffset(store.notes, store.paging);
     }
 
-    updateStore('fetchingInProgress', () => true);
-
-    const { notes, reads, paging } = await fetchMegaFeed(
+    const { notes, userPolls, zapPolls, reads, paging } = await fetchMegaMultiFeed(
       accountStore.publicKey,
       spec,
       subId,
+      [Kind.Text, Kind.UserPoll, Kind.ZapPoll, Kind.LongForm],
       {
         until,
         limit: pageSize,
@@ -102,8 +105,8 @@ const Bookmarks: Component = () => {
     );
 
     if (kind() === 'notes') {
-      const sortedNotes = filterAndSortNotes(notes, paging);
-      updateStore('notes', (nts) => [...nts, ...sortedNotes]);
+      const sortedNotes = filterAndSortEvents([ ...notes, ...userPolls, ...zapPolls], paging);
+      updateStore('notes', (nts) => [...nts, ...(sortedNotes as (PrimalNote | PrimalUserPoll)[])]);
     }
 
     if (kind() === 'reads') {
@@ -119,7 +122,7 @@ const Bookmarks: Component = () => {
   const fetchNextPage = () => {
     const until = store.paging.since || 0;
 
-    if (until > 0) {
+    if (until > 0 && !store.fetchingInProgress) {
       fetchBookmarks(accountStore.publicKey, until)
     }
   };
@@ -171,14 +174,39 @@ const Bookmarks: Component = () => {
                 <Match when={kind() === 'notes'}>
                   <For each={store.notes}>
                     {(note) =>
-                      <div class="animated">
-                        <Note
-                          note={note}
-                          onRemove={(id: string) => {
-                            updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
-                          }}
-                        />
-                      </div>
+                      <Switch>
+                        <Match when={note.msg.kind === Kind.Text}>
+                          <div class="animated">
+                            <Note
+                              note={note}
+                              shorten={true}
+                              onRemove={(id: string) => {
+                                updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
+                              }}
+                            />
+                          </div>
+                        </Match>
+                        <Match when={note.msg.kind === Kind.UserPoll}>
+                          <div class="animated">
+                            <UserPoll
+                              poll={note}
+                              onRemove={(id: string) => {
+                                updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
+                              }}
+                            />
+                          </div>
+                        </Match>
+                        <Match when={note.msg.kind === Kind.ZapPoll}>
+                          <div class="animated">
+                            <ZapPoll
+                              poll={note}
+                              onRemove={(id: string) => {
+                                updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
+                              }}
+                            />
+                          </div>
+                        </Match>
+                      </Switch>
                     }
                   </For>
                 </Match>
