@@ -3,7 +3,7 @@ import { verifyEvent, nip46, getPublicKey, generatePrivateKey } from '../lib/nTo
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { uuidv4 } from '../utils';
 import { logWarning } from './logger';
-import primalLogo from '../assets/icons/logo_fire_roster.png';
+import primalLogo from '../assets/icons/logo_remote.png';
 import { timeoutPromise } from './nostrAPI';
 
 export let appSigner: nip46.BunkerSigner | undefined;
