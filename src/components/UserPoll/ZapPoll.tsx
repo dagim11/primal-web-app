@@ -15,7 +15,7 @@ import NoteTopZapsCompact from "../Note/NoteTopZapsCompact";
 import { createStore } from "solid-js/store";
 import { NoteReactionsState } from "../Note/Note";
 import NoteFooter from "../Note/NoteFooter/NoteFooter";
-import { accountStore } from "../../stores/accountStore";
+import { accountStore, hasPublicKey, showGetStarted, showMissingNWC } from "../../stores/accountStore";
 import { useThreadContext } from "../../contexts/ThreadContext";
 import { useSettingsContext } from "../../contexts/SettingsContext";
 import NoteContextTrigger from "../Note/NoteContextTrigger";
@@ -71,6 +71,15 @@ const ZapPoll: Component<UserPollProps> = (props) => {
   const [votedSats, setVotedSats] = createSignal(props.poll.zapLimits?.min || 0);
 
   const doVote = async (choice: PrimalPollChoice) => {
+    if (!hasPublicKey() || ['guest', 'none', 'npub'].includes(accountStore.loginType)) {
+      showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
     app?.actions.openVoteZapModal({
       poll: props.poll,
       choice,

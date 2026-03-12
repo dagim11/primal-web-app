@@ -62,6 +62,21 @@ export const removeNWC = (walletName: string) => {
   updateNWCSettings();
 };
 
+export const clearNWC = (permanent?: boolean) => {
+  if (!accountStore?.publicKey) return;
+
+  updateNWCList([]);
+
+  setActiveNWC([]);
+
+  saveNWC(accountStore.publicKey, accountStore.nwcList);
+  saveNWCActive(accountStore.publicKey);
+
+  if (permanent) {
+    updateNWCSettings();
+  }
+};
+
 export const updateNWCSettings = () => {
   const subId = `update_nwc_settings_${APP_ID}`;
 

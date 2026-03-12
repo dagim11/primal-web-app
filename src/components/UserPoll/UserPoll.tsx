@@ -15,7 +15,7 @@ import NoteTopZapsCompact from "../Note/NoteTopZapsCompact";
 import { createStore } from "solid-js/store";
 import { NoteReactionsState } from "../Note/Note";
 import NoteFooter from "../Note/NoteFooter/NoteFooter";
-import { accountStore } from "../../stores/accountStore";
+import { accountStore, hasPublicKey, showGetStarted } from "../../stores/accountStore";
 import { useThreadContext } from "../../contexts/ThreadContext";
 import { useSettingsContext } from "../../contexts/SettingsContext";
 import NoteContextTrigger from "../Note/NoteContextTrigger";
@@ -70,6 +70,11 @@ const UserPoll: Component<UserPollProps> = (props) => {
   const [votedFor, setVotedFor] = createSignal('');
 
   const doVote = (choice: PrimalPollChoice) => {
+    if (!hasPublicKey() || ['guest', 'none', 'npub'].includes(accountStore.loginType)) {
+      showGetStarted();
+      return;
+    }
+
     sendUserPollVote(props.poll, choice);
     setVotedFor(choice.id);
     setDidVote(true);

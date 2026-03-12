@@ -1,0 +1,136 @@
+.title {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+  margin-left: 16px;
+}
+
+.modal {
+  width: fit-content;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+  padding-inline: 16px;
+  padding-bottom: 8px;
+
+  .infoWrapper {
+    display: flex;
+    gap: 40px;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    .qrCode {
+      max-width: 234px;
+      max-height: 234px;
+      overflow: hidden;
+      border-radius: 12px;
+      background-color: white;
+      padding: 17px;
+
+      .actualQr {
+        width: 200px;
+        height: 200px;
+        overflow: hidden;
+        border-radius: 12px;
+      }
+    }
+
+    .loginSteps {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+
+      .loginExplain {
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+      }
+
+      .loginList {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 40px;
+
+        .loginListItem {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          .number {
+            color: var(--accent-links);
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 26px;
+          }
+
+          .itemLabel {
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 26px;
+
+            button {
+              display: inline;
+              width: fit-content;
+              color: var(--accent-links);
+              font-size: 18px;
+              font-weight: 400;
+              line-height: 26px;
+              margin: 0;
+              padding: 0;
+              border: none;
+              outline: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .bellowInfo {
+    width: 100%;
+    display: flex;
+    gap: 48px;
+    margin-top:16px;
+
+    .appLinks {
+      display: flex;
+      justify-content: space-between;
+      width: 234px;
+
+      a {
+        img {
+          width: 108px;
+          height: 34px;
+        }
+      }
+    }
+
+    .loginNow {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+
+      button {
+        display: inline;
+        width: fit-content;
+        color: var(--accent-links);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+      }
+    }
+  }
+}
+
+.hidden {
+  display: none;
+}

@@ -309,16 +309,22 @@ const VotesModal: Component<{
                       user={vote.user}
                     />
                   </div>
-                  <Show
-                    when={vote.user?.nip05}
-                  >
-                    <span
-                      class={styles.verification}
-                      title={vote.user?.nip05}
-                    >
-                      {nip05Verification(vote.user)}
-                    </span>
-                  </Show>
+                  <Switch>
+                    <Match when={vote.message && vote.message.length > 0}>
+                      <span
+                        class={styles.verification}
+                      >
+                        {vote.message}
+                      </span>
+                    </Match>
+                    <Match when={vote.user?.nip05}>
+                      <span
+                        class={styles.verification}
+                      >
+                        {nip05Verification(vote.user)}
+                      </span>
+                    </Match>
+                  </Switch>
                 </div>
               </div>
             )}

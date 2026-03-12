@@ -37,6 +37,7 @@ import { storeSec } from '../../lib/localStore';
 import GetStartedModal from '../LoginModal/GetStartedModal';
 import VotesModal from '../UserPoll/VotesModal';
 import ZapVote from '../CustomZap/ZapVote';
+import MissingNWCModal from '../MissingNWCModal/MissingNWCModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -208,10 +209,17 @@ const Layout: Component<any> = (props) => {
             setFlag('showForgot', true);
           }}
         />
+
         <CreateAccountModal
           open={accountStore.showCreateAccount}
           onAbort={() => setFlag('showCreateAccount', false)}
         />
+
+        <MissingNWCModal
+          open={accountStore.showMissingNWC}
+          onClose={() => setFlag('showMissingNWC', false)}
+        />
+
         <GetStartedModal
           open={accountStore.showGettingStarted}
           onAbort={() => {
@@ -224,6 +232,9 @@ const Layout: Component<any> = (props) => {
             }
           }}
         />
+
+
+
         <LoginModal
           open={accountStore.showLogin}
           onAbort={() => {

@@ -118,8 +118,7 @@ import {
 } from "../sockets";
 import { fetchPeople } from "../megaFeeds";
 import { appSigner, getAppSK, setAppSigner } from "../lib/PrimalNip46";
-import { updateStore } from "../services/StoreService";
-import { batch, createSignal } from "solid-js";
+import { clearNWC } from "../pages/Settings/NostrWalletConnect";
 
 
 export type FollowData = {
@@ -171,6 +170,7 @@ export type AccountStore = {
   showGettingStarted: boolean,
   showLogin: boolean,
   showCreateAccount: boolean,
+  showMissingNWC: boolean,
   emojiHistory: EmojiOption[],
   membershipStatus: MembershipStatus,
   bookmarks: string[],
@@ -224,6 +224,7 @@ export const initAccountStore: AccountStore = {
   showGettingStarted: false,
   showLogin: false,
   showCreateAccount: false,
+  showMissingNWC: false,
   emojiHistory: [],
   membershipStatus: {},
   bookmarks: [],
@@ -581,6 +582,10 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('showGettingStarted', () => true);
   }
 
+  export const showMissingNWC = () => {
+    updateAccountStore('showMissingNWC', () => true);
+  }
+
   export const showLogin = () => {
     updateAccountStore('showLogin', () => true);
   }
@@ -599,6 +604,8 @@ export const initAccountStore: AccountStore = {
     localStorage.removeItem('clientConnectionUrl');
     localStorage.removeItem('appNsec');
     localStorage.removeItem('appPubkey');
+
+    clearNWC();
 
     setLoginType('guest');
   };
