@@ -40,7 +40,7 @@ export const emptyPoll = (): PollState => ({
   pollType: 'singlechoice',
   endsAt: getNowTimestamp(),
   pollLength: { days: '1 days', hours: '0 hours', minutes: '0 minutes' },
-  zapLimits: { min: 10, max: 100 },
+  zapLimits: { min: 21, max: 21_000 },
 
   focusedInput: '',
   externalInput: '',
