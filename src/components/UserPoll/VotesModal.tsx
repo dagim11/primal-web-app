@@ -225,7 +225,7 @@ const VotesModal: Component<{
                 onClick={() => setSelectedChoice(choice.id)}
                 disabled={(pollResults()?.[choice.id]?.votes || 0) < 1}
               >
-                <div class={styles.option}>
+                <div class={`${styles.option} ${props.poll?.msg.kind === Kind.ZapPoll ? styles.satsOption : ''}`}>
                   <div
                     class={`${styles.graph} ${['sunrise', 'ice'].includes(settings?.theme || '') ? styles.transparent : ''} ${selectedChoice() === choice.id ? styles.highlight : ''}`}
                     style={`--percent-width: ${choicePercent(choice.id)}%`}
@@ -243,7 +243,12 @@ const VotesModal: Component<{
                       <div>{choicePercent(choice.id)}%</div>
                     }
                   >
-                    <div>{choiceZaps(choice.id)} sats</div>
+                    <div
+                      class={styles.satsZapped}
+                      title={choiceZaps(choice.id)}
+                    >
+                      {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                    </div>
                   </Show>
                   <div class={styles.moreVotes}>see votes</div>
                 </div>
