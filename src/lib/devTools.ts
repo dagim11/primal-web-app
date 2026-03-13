@@ -1,6 +1,7 @@
 import { onMount, onCleanup } from "solid-js";
 import { ComponentLog, PrimalWindow } from "../types/primal";
 import { logWarning } from "./logger";
+import { uuidv4 } from "../utils";
 
 const hook = (type: 'onPrimalComponentMount' | 'onPrimalComponentCleanup', data: ComponentLog) => {
   const fn = (window as PrimalWindow)[type];
@@ -13,7 +14,7 @@ export const hookForDev = (fn: Function) => {
   }
 
   return (props: any) => {
-    const domId = props.id || `${fn.name}_${crypto.randomUUID()}`;
+    const domId = props.id || `${fn.name}_${uuidv4()}`;
     const scope: ComponentLog = { name: fn.name, props, domId };
 
     onMount(() => {
