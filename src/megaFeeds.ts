@@ -1061,6 +1061,9 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
     }
 
+    // Ignore vote zaps when storing top zaps
+    if (zapInfo.tags.find(t => t[0] === 'poll_option')) return;
+
     const topZap: TopZap = {
       id: zapInfo.id,
       amount: parseInt(amount || '0'),
@@ -1068,7 +1071,6 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       message: zapInfo.content,
       eventId,
     };
-
 
     const oldZaps = page.topZaps[eventId];
 

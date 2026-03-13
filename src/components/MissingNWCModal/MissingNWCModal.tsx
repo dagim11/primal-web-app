@@ -1,19 +1,9 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component } from 'solid-js';
 
-import { account as t, actions as tActions } from '../../translations';
-
 import styles from './MissingNWCModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-import { showGetStarted } from '../../stores/accountStore';
-
-import { appStoreLink, playstoreLink } from '../../constants';
-
-import appstoreImg from '../../assets/images/appstore_download.svg';
-import playstoreImg from '../../assets/images/playstore_download.svg';
-import primalQr from '../../assets/images/primal_qr.png';
-import QrCode from '../QrCode/QrCode';
 
 const MissingNWCModal: Component<{
   id?: string,

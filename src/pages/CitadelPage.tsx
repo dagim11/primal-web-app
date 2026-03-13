@@ -32,7 +32,7 @@ import { hashtagCharsRegex, Kind } from '../constants';
 
 import mempoolPlaceholder from '../assets/images/mempool_placeholder.png';
 import citadelLogo from '../assets/images/citadel_logo.png';
-import { accountStore, hasPublicKey, setShowPin, showGetStarted } from '../stores/accountStore';
+import { accountStore, hasPublicKey, setShowPin, showGetStarted, showMissingNWC } from '../stores/accountStore';
 
 
 const QA_PUBKEY = '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079';
@@ -825,6 +825,11 @@ const CitadelPage: Component = () => {
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -885,6 +890,11 @@ const CitadelPage: Component = () => {
   const doQuickZap = async () => {
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 

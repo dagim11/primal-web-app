@@ -15,13 +15,15 @@ import NoteTopZapsCompact from "../Note/NoteTopZapsCompact";
 import { createStore } from "solid-js/store";
 import { NoteReactionsState } from "../Note/Note";
 import NoteFooter from "../Note/NoteFooter/NoteFooter";
-import { accountStore, hasPublicKey, showGetStarted, showMissingNWC } from "../../stores/accountStore";
+import { accountStore, hasPublicKey, setShowPin, showGetStarted, showMissingNWC } from "../../stores/accountStore";
 import { useThreadContext } from "../../contexts/ThreadContext";
 import { useSettingsContext } from "../../contexts/SettingsContext";
 import NoteContextTrigger from "../Note/NoteContextTrigger";
 import NoteHeader from "../Note/NoteHeader/NoteHeader";
 import NoteTopZaps from "../Note/NoteTopZaps";
 import NoteRepostHeader from "../Note/NoteRepostHeader";
+import { Kind } from "../../constants";
+import { readSecFromStorage } from "../../lib/localStore";
 
 export type UserPollProps = {
   id: string,
@@ -80,6 +82,15 @@ const ZapPoll: Component<UserPollProps> = (props) => {
       showMissingNWC();
       return;
     }
+
+    if (!accountStore.sec || accountStore.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
+      }
+    }
+
     app?.actions.openVoteZapModal({
       poll: props.poll,
       choice,
@@ -411,7 +422,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                             </div>
                           </div>
                           <div class={styles.number}>
-                            {choiceZaps(choice.id)} sats
+                            <Show
+                              when={props.poll?.msg.kind === Kind.ZapPoll}
+                              fallback={
+                                <div>{choicePercent(choice.id)}%</div>
+                              }
+                            >
+                              <div
+                                class={styles.satsZapped}
+                                title={`${choiceZaps(choice.id)}`}
+                              >
+                                {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                              </div>
+                            </Show>
                           </div>
                         </button>
                       )}
@@ -423,7 +446,7 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                         <button
                           class={`${styles.choiceResult} ${styles.locked}`}
                         >
-                          <div class={styles.option}>
+                          <div class={`${styles.option} ${props.poll?.msg.kind === Kind.ZapPoll ? styles.satsOption : ''}`}>
                             <div
                               class={`${styles.graph} ${['sunrise', 'ice'].includes(settings?.theme || '') ? styles.transparent : ''} ${hasVotedFor(choice.id) ? styles.highlight : ''}`}
                               style={`--percent-width: ${choicePercent(choice.id)}%`}
@@ -435,7 +458,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                             </div>
                           </div>
                           <div class={styles.number}>
-                            {choiceZaps(choice.id)} sats
+                            <Show
+                              when={props.poll?.msg.kind === Kind.ZapPoll}
+                              fallback={
+                                <div>{choicePercent(choice.id)}%</div>
+                              }
+                            >
+                              <div
+                                class={styles.satsZapped}
+                                title={`${choiceZaps(choice.id)}`}
+                              >
+                                {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                              </div>
+                            </Show>
                           </div>
                         </button>
                       )}
@@ -570,7 +605,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                               </div>
                             </div>
                             <div class={styles.number}>
-                              {choiceZaps(choice.id)} sats
+                              <Show
+                                when={props.poll?.msg.kind === Kind.ZapPoll}
+                                fallback={
+                                  <div>{choicePercent(choice.id)}%</div>
+                                }
+                              >
+                                <div
+                                  class={styles.satsZapped}
+                                  title={`${choiceZaps(choice.id)}`}
+                                >
+                                  {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                                </div>
+                              </Show>
                             </div>
                           </button>
                         )}
@@ -594,7 +641,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                               </div>
                             </div>
                             <div class={styles.number}>
-                              {choiceZaps(choice.id)} sats
+                              <Show
+                                when={props.poll?.msg.kind === Kind.ZapPoll}
+                                fallback={
+                                  <div>{choicePercent(choice.id)}%</div>
+                                }
+                              >
+                                <div
+                                  class={styles.satsZapped}
+                                  title={`${choiceZaps(choice.id)}`}
+                                >
+                                  {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                                </div>
+                              </Show>
                             </div>
                           </button>
                         )}
@@ -721,7 +780,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                               </div>
                             </div>
                             <div class={styles.number}>
-                              {choiceZaps(choice.id)} sats
+                              <Show
+                                when={props.poll?.msg.kind === Kind.ZapPoll}
+                                fallback={
+                                  <div>{choicePercent(choice.id)}%</div>
+                                }
+                              >
+                                <div
+                                  class={styles.satsZapped}
+                                  title={`${choiceZaps(choice.id)}`}
+                                >
+                                  {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                                </div>
+                              </Show>
                             </div>
                           </button>
                         )}
@@ -745,7 +816,19 @@ const ZapPoll: Component<UserPollProps> = (props) => {
                               </div>
                             </div>
                             <div class={styles.number}>
-                              {choiceZaps(choice.id)} sats
+                              <Show
+                                when={props.poll?.msg.kind === Kind.ZapPoll}
+                                fallback={
+                                  <div>{choicePercent(choice.id)}%</div>
+                                }
+                              >
+                                <div
+                                  class={styles.satsZapped}
+                                  title={`${choiceZaps(choice.id)}`}
+                                >
+                                  {humanizeNumber(choiceZaps(choice.id), true)} <span>sats</span>
+                                </div>
+                              </Show>
                             </div>
                           </button>
                         )}

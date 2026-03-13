@@ -428,6 +428,11 @@
       position: relative;
       width: calc(100% - 64px);
       height: 32px;
+
+      &.satsOption {
+        width: calc(100% - 92px);
+      }
+
       .label {
         position: relative;
         z-index: 1;
@@ -487,12 +492,26 @@
     }
 
     .number {
-      width: 60px;
       color: var(--text-primary);
       text-align: right;
       font-size: 15px;
       font-weight: 700;
       line-height: 20px;
+
+      .satsZapped {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 16px;
+
+        span {
+          margin-left: 4px;
+          color: var(--text-secondary);
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 16px;
+        }
+      }
     }
   }
 }

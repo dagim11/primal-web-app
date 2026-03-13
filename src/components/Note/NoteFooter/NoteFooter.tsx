@@ -32,6 +32,7 @@ import {
   quoteNote,
   setShowPin,
   showGetStarted,
+  showMissingNWC,
   showNewNoteForm,
 } from '../../../stores/accountStore';
 
@@ -248,6 +249,12 @@ const NoteFooter: Component<{
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      props.updateState && props.updateState('isZapping', () => false);
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -281,6 +288,11 @@ const NoteFooter: Component<{
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -288,6 +300,7 @@ const NoteFooter: Component<{
         return;
       }
     }
+
 
     if (!canUserReceiveZaps(props.note.user)) {
       return;
@@ -358,6 +371,11 @@ const NoteFooter: Component<{
   const doQuickZap = async () => {
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 

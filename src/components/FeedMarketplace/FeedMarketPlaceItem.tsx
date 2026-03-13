@@ -13,7 +13,7 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
 import { A } from '@solidjs/router';
-import { accountStore, addLike, hasPublicKey, showGetStarted } from '../../stores/accountStore';
+import { accountStore, addLike, hasPublicKey, showGetStarted, showMissingNWC } from '../../stores/accountStore';
 
 
 const FeedMarketItem: Component<{
@@ -201,6 +201,11 @@ const FeedMarketItem: Component<{
     //   return;
     // }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     if (!canUserReceiveZaps(props.author)) {
       toast?.sendWarning(
         intl.formatMessage(t.zapDVMUnavailable),
@@ -232,6 +237,11 @@ const FeedMarketItem: Component<{
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     // if ((!account.proxyThroughPrimal && account.relays.length === 0)) {
     //   return;
     // }
@@ -244,6 +254,11 @@ const FeedMarketItem: Component<{
   const doQuickZap = async () => {
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 

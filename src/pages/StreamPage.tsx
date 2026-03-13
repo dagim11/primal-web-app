@@ -40,7 +40,7 @@ import CheckBox from '../components/Checkbox/CheckBox';
 import TopZapModal from '../components/TopZapsModal/TopZapModal';
 import Paginator from '../components/Paginator/Paginator';
 import { hashtagCharsRegex, Kind } from '../constants';
-import { accountStore, addToStreamMuteList, hasPublicKey, removeFromStreamMuteList, setShowPin, showGetStarted } from '../stores/accountStore';
+import { accountStore, addToStreamMuteList, hasPublicKey, removeFromStreamMuteList, setShowPin, showGetStarted, showMissingNWC } from '../stores/accountStore';
 
 const CHAT_PAGE_SIZE = 25;
 
@@ -825,6 +825,12 @@ const StreamPage: Component = () => {
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      setIsZapping(() => false);
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -861,6 +867,11 @@ const StreamPage: Component = () => {
   const doQuickZap = async () => {
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 

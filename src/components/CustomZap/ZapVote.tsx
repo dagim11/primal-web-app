@@ -16,7 +16,7 @@ import { useToastContext } from '../Toaster/Toaster';
 import styles from './CustomZap.module.scss';
 import { readSecFromStorage } from '../../lib/localStore';
 import { StreamingData } from '../../lib/streaming';
-import { accountStore, hasPublicKey, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { accountStore, hasPublicKey, setShowPin, showGetStarted, showMissingNWC } from '../../stores/accountStore';
 import { VoteZapInfo } from '../../contexts/AppContext';
 import { sendUserPollVote } from '../../lib/notes';
 import { humanizeNumber } from '../../lib/stats';
@@ -130,6 +130,11 @@ const ZapVote: Component<{
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -137,6 +142,7 @@ const ZapVote: Component<{
         return;
       }
     }
+
 
     props.config?.onConfirm(selectedValue());
 

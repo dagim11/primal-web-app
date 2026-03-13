@@ -30,6 +30,7 @@ import {
   quoteNote,
   setShowPin,
   showGetStarted,
+  showMissingNWC,
   showNewNoteForm,
 } from '../../../stores/accountStore';
 
@@ -185,6 +186,11 @@ const ArticleFooter: Component<{
       return;
     }
 
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
+      return;
+    }
+
     if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -215,6 +221,11 @@ const ArticleFooter: Component<{
 
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 
@@ -286,6 +297,11 @@ const ArticleFooter: Component<{
   const doQuickZap = async () => {
     if (!hasPublicKey()) {
       showGetStarted();
+      return;
+    }
+
+    if (accountStore.activeNWC.length === 0) {
+      showMissingNWC();
       return;
     }
 
