@@ -936,7 +936,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       if (content.kind === Kind.Metadata) {
         const user = JSON.parse(content.content);
 
-        updateStore('userProfile', () => ({...user, pubkey: content.pubkey}));
+        updateStore('userProfile', () => ({...user, pubkey: content.pubkey, msg: content}));
       }
     }
   }
@@ -1028,7 +1028,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       user.npub = hexToNpub(content.pubkey);
       user.created_at = content.created_at;
 
-      updateStore('userProfile', () => ({ ...user }));
+      updateStore('userProfile', () => ({ ...user, msg: content }));
       addProfileToHistory(user);
       return;
     }

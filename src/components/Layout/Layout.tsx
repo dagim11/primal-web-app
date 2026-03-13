@@ -233,8 +233,6 @@ const Layout: Component<any> = (props) => {
           }}
         />
 
-
-
         <LoginModal
           open={accountStore.showLogin}
           onAbort={() => {

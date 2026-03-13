@@ -163,7 +163,7 @@ export type AppContextStore = {
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
   showProfileQr: PrimalUser | undefined,
-  reportContent: PrimalNote | PrimalArticle | NostrLiveChat | undefined,
+  reportContent: PrimalNote | PrimalArticle | PrimalUser | PrimalUserPoll | NostrLiveChat | StreamingData | undefined | undefined,
   signer: nip46.BunkerSigner | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
@@ -227,7 +227,7 @@ export type AppContextStore = {
     getUserBlossomUrls: (pubkey: string) => string[],
     openProfileQr: (user: PrimalUser) => void,
     closeProfileQr: () => void,
-    openReportContent: (content: PrimalNote | PrimalArticle | NostrLiveChat) => void,
+    openReportContent: (content: PrimalNote | PrimalArticle | PrimalUser | PrimalUserPoll | NostrLiveChat | StreamingData | undefined) => void,
     closeReportContent: () => void,
   },
 }
@@ -349,7 +349,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const openContextMenu = (
-    note: PrimalNote | PrimalArticle,
+    note: PrimalNote | PrimalArticle | PrimalUserPoll,
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
@@ -493,7 +493,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
       const mint = new CashuMint(formatted);
       store.cashuMints.set(formatted, mint);
     }
-    return store.cashuMints.get(formatted);
+    return store.cashuMints.get(formatted) as CashuMint | undefined;
   };
 
   const openAuthorSubscribeModal = (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => {
@@ -553,7 +553,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showProfileQr', () => undefined);
   }
 
-  const openReportContent = (user: PrimalNote | PrimalArticle | NostrLiveChat) => {
+  const openReportContent = (user: PrimalNote | PrimalArticle | PrimalUser | PrimalUserPoll | NostrLiveChat | StreamingData | undefined) => {
     updateStore('reportContent', () => ({ ...user }));
   }
 
@@ -679,17 +679,17 @@ const onSocketClose = (closeEvent: CloseEvent) => {
 
   createEffect(() => {
     if (store.isInactive) {
-      updateStore('appState', () => 'sleep');
+      updateStore('appState', 'sleep');
       clearTimeout(wakingTimeout);
     }
     else {
       // Set this state in order to make sure that we reload page
       // when user requests future notes because we didn't fetch them yet
-      updateStore('appState', () => 'waking');
+      updateStore('appState', 'waking');
 
       // Give time for future notes fetching to fire before changing state
       wakingTimeout = setTimeout(() => {
-        updateStore('appState', () => 'woke');
+        updateStore('appState', 'woke');
       }, 36_000);
     }
   });

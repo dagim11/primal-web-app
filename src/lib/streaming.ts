@@ -2,7 +2,7 @@ import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { emptyMegaFeedPage, pageResolve, updateFeedPage } from "../megaFeeds";
 import { sendMessage, subsTo } from "../sockets";
-import { MegaFeedPage, NostrEventContent } from "../types/primal";
+import { MegaFeedPage, NostrEventContent, NostrNoteContent } from "../types/primal";
 import { getEvents } from "./feed";
 import { getReplacableEvent } from "./notes";
 
@@ -21,6 +21,7 @@ export type StreamingData = {
   event?: NostrEventContent,
   hosts?: string[],
   participants?: string[],
+  msg?: NostrNoteContent,
 }
 
 export const startLiveChat = (
@@ -92,6 +93,7 @@ export const getStreamingEvent = (id: string, pubkey: string | undefined) => {
             event: {...content},
             hosts: (data.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (data.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            msg: {...(content as NostrNoteContent)},
           }
 
         }
@@ -161,6 +163,7 @@ export const findStreamByHost = async (identifier: string | undefined, host_pubk
             event: {...content},
             hosts: (data.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (data.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            msg: {...(content as NostrNoteContent)},
           }
 
         }

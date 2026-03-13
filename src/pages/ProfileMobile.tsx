@@ -26,7 +26,7 @@ import FollowButton from '../components/FollowButton/FollowButton';
 import { useMediaContext } from '../contexts/MediaContext';
 import { profile as t, actions as tActions, toast as tToast, toastZapProfile } from '../translations';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
-import { fetchKnownProfiles, isAccountVerified, reportUser } from '../lib/profile';
+import { fetchKnownProfiles, isAccountVerified } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
@@ -62,7 +62,6 @@ const ProfileMobile: Component = () => {
   const params = useParams();
 
   const [showContext, setContext] = createSignal(false);
-  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [openQr, setOpenQr] = createSignal(false);
 
@@ -403,7 +402,7 @@ const ProfileMobile: Component = () => {
       {
         label: intl.formatMessage(tActions.profileContext.reportUser),
         action: () => {
-          setConfirmReportUser(true);
+          doReportUser();
           setContext(false);
         },
         icon: 'report',
@@ -428,9 +427,8 @@ const ProfileMobile: Component = () => {
       return;
     }
 
-    reportUser(pk, `report_user_${APP_ID}`, profile?.userProfile);
+    app?.actions.openReportContent(profile?.userProfile);
     setContext(false);
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
   };
 
   const addToTheAllowlist = async () => {
@@ -933,16 +931,6 @@ const ProfileMobile: Component = () => {
       >
         <ProfileTabs setProfile={setProfile} profileKey={profile?.profileKey} />
       </Show>
-
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
 
       <ConfirmModal
         open={confirmMuteUser()}

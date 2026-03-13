@@ -2,7 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 
 import { Component, createSignal } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { NostrLiveChat, PrimalArticle, PrimalNote } from '../../types/primal';
+import { NostrLiveChat, PrimalArticle, PrimalNote, PrimalUser, PrimalUserPoll } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 
 import styles from './ReportContentModal.module.scss';
@@ -14,12 +14,15 @@ import { sendContentReport } from '../../lib/notes';
 import { useToastContext } from '../Toaster/Toaster';
 import RadioBox, { RadioBoxOption } from '../Checkbox/RadioBox';
 import { titleCase } from '../../utils';
+import { StreamingData } from '../../lib/streaming';
+import { reportUser } from '../../lib/profile';
+import { Kind } from '../../constants';
 
 const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'];
 
 const ReportContentModal: Component<{
   id?: string,
-  note: PrimalNote | PrimalArticle | NostrLiveChat,
+  note: PrimalNote | PrimalArticle | NostrLiveChat | PrimalUser | PrimalUserPoll | StreamingData | undefined,
   onClose: () => void,
   onReport?: () => void,
 }> = (props) => {
@@ -27,6 +30,38 @@ const ReportContentModal: Component<{
   const toast = useToastContext();
 
   const [selectedReason, setSelectedReason] = createSignal<string>();
+
+  const doReport = async () => {
+    const ev = props.note;
+    if (!ev) return;
+
+
+    if (ev.msg.kind === Kind.Metadata) {
+      const { success, note } = await reportUser(
+        ev.pubkey,
+        selectedReason() || '',
+      );
+
+      if (success && note) {
+        toast?.sendSuccess(`Content reported as ${selectedReason()}`)
+      }
+
+      props.onClose();
+      return;
+    }
+
+    const { success, note: event } = await sendContentReport(
+      ev.msg.id,
+      ev.msg.pubkey,
+      selectedReason() || '',
+    );
+
+    if (success && event) {
+      toast?.sendSuccess(`Content reported as ${selectedReason()}`)
+    }
+
+    props.onClose();
+  }
 
   return (
     <AdvancedSearchDialog
@@ -61,19 +96,7 @@ const ReportContentModal: Component<{
           <div class={styles.payAction}>
             <ButtonPrimary
               disabled={selectedReason() === undefined}
-              onClick={async () => {
-                const { success, note: event } = await sendContentReport(
-                  props.note.id,
-                  props.note.pubkey,
-                  selectedReason() || '',
-                );
-
-                if (success && event) {
-                  toast?.sendSuccess(`Content reported as ${selectedReason()}`)
-                }
-
-                props.onClose();
-              }}
+              onClick={doReport}
             >
               Report
             </ButtonPrimary>

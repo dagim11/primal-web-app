@@ -3,15 +3,13 @@ import { MenuItem, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, userName } from '../../stores/profile';
+import { authorName } from '../../stores/profile';
 import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { APP_ID } from '../../App';
-import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { sendDeleteEvent } from '../../lib/notes';
-import { NoteContextMenuInfo } from '../../contexts/AppContext';
+import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
@@ -36,8 +34,8 @@ const ArticleDraftContextMenu: Component<{
   const toaster = useToastContext();
   const intl = useIntl();
   const navigate = useNavigate();
+  const app = useAppContext();
 
-  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmDeleteDraft, setConfirmDeleteDraft] = createSignal(false);
 
@@ -98,9 +96,8 @@ const ArticleDraftContextMenu: Component<{
       }
     }
 
-    reportUser(note()?.user.pubkey, `report_user_${APP_ID}`, note()?.user);
+    app?.actions.openReportContent(note()?.user);
     props.onClose();
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
 
@@ -216,8 +213,8 @@ const ArticleDraftContextMenu: Component<{
       {
         label: intl.formatMessage(tActions.noteContext.reportAuthor),
         action: () => {
-          setConfirmReportUser(true);
-          props.onClose()
+          doReportUser();
+          props.onClose();
         },
         icon: 'report',
         warning: true,
@@ -233,15 +230,6 @@ const ArticleDraftContextMenu: Component<{
 
   return (
     <div class={styles.contextMenu} ref={context}>
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName(note()?.user) })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
 
       <ConfirmModal
         open={confirmMuteUser()}

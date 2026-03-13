@@ -3,12 +3,10 @@ import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/prim
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, userName } from '../../stores/profile';
+import { authorName } from '../../stores/profile';
 import { actions as tActions, toast as tToast, } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { APP_ID } from '../../App';
-import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { broadcastEvent, sendDeleteEvent, sendDraft } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
@@ -40,7 +38,6 @@ const ArticleOverviewContextMenu: Component<{
   const app = useAppContext();
   const navigate = useNavigate();
 
-  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmUnpublishArticle, setConfirmUnpublishArticle] = createSignal(false);
   const [confirmDeleteArticle, setConfirmDeleteArticle] = createSignal(false);
@@ -102,9 +99,8 @@ const ArticleOverviewContextMenu: Component<{
       }
     }
 
-    reportUser(note()?.user.pubkey, `report_user_${APP_ID}`, note()?.user);
+    app?.actions.openReportContent(note()?.user);
     props.onClose();
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
 
@@ -203,6 +199,7 @@ const ArticleOverviewContextMenu: Component<{
 
   const copyNoteText = () => {
     if (!props.data) return;
+    // @ts-ignore
     navigator.clipboard.writeText(`${note().content}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
@@ -338,8 +335,8 @@ const ArticleOverviewContextMenu: Component<{
       {
         label: intl.formatMessage(tActions.noteContext.reportAuthor),
         action: () => {
-          setConfirmReportUser(true);
-          props.onClose()
+          doReportUser();
+          props.onClose();
         },
         icon: 'report',
         warning: true,
@@ -355,15 +352,6 @@ const ArticleOverviewContextMenu: Component<{
 
   return (
     <div class={styles.contextMenu} ref={context}>
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName(note()?.user) })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
 
       <ConfirmModal
         open={confirmMuteUser()}

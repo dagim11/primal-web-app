@@ -539,6 +539,7 @@ export type NostrLiveChat = {
   pubkey: string,
   id: string,
   tags?: string[][],
+  msg: NostrNoteContent,
 };
 
 export type NostrLiveEventStats = {

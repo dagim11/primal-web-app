@@ -1,14 +1,12 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent, PrimalArticle, PrimalNote } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, userName } from '../../stores/profile';
+import { authorName } from '../../stores/profile';
 import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { APP_ID } from '../../App';
-import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { broadcastEvent, sendDeleteEvent } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
@@ -17,7 +15,6 @@ import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
-import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
 
@@ -32,9 +29,6 @@ const NoteContextMenu: Component<{
   const app = useAppContext();
   const navigate = useNavigate();
 
-  const [showContext, setContext] = createSignal(false);
-  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
-  const [confirmReportContent, setConfirmReportContent] = createSignal<PrimalNote | PrimalArticle>();
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
@@ -106,9 +100,8 @@ const NoteContextMenu: Component<{
       }
     }
 
-    reportUser(note()?.user.pubkey, `report_user_${APP_ID}`, note()?.user);
+    app?.actions.openReportContent(note()?.user);
     props.onClose();
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
   // get note url
@@ -146,8 +139,10 @@ const NoteContextMenu: Component<{
     if (!props.data) return;
 
     if ([Kind.UserPoll, Kind.ZapPoll].includes(note().msg.kind)) {
+      // @ts-ignore
       navigator.clipboard.writeText(`${note().question ||''}`);
     } else {
+      // @ts-ignore
       navigator.clipboard.writeText(`${note().content}`);
     }
 
@@ -331,7 +326,7 @@ const NoteContextMenu: Component<{
       // {
       //   label: intl.formatMessage(tActions.noteContext.reportAuthor),
       //   action: () => {
-      //     setConfirmReportUser(true);
+      //     doReportUser();
       //     props.onClose()
       //   },
       //   icon: 'report',
@@ -341,7 +336,7 @@ const NoteContextMenu: Component<{
         label: intl.formatMessage(tActions.noteContext.reportContent),
         action: () => {
           const n = note();
-          n && setConfirmReportContent(() => ({ ...n }));
+          n && app?.actions.openReportContent(n);
           props.onClose();
         },
         icon: 'report',
@@ -392,21 +387,6 @@ const NoteContextMenu: Component<{
 
   return (
     <div class={styles.contextMenu} ref={context}>
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName(note()?.user) })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
-
-      <ReportContentModal
-        note={confirmReportContent()}
-        onClose={() => setConfirmReportContent(undefined)}
-      />
-
       <ConfirmModal
         open={confirmMuteUser()}
         description={intl.formatMessage(tActions.muteUserConfirm, { name: authorName(note()?.user) })}

@@ -2,7 +2,7 @@ import { nip05, nip19 } from "../lib/nTools";
 import { Kind, minKnownProfiles, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
-import { Filterlist, NostrRelays, PrimalUser, VanityProfiles } from "../types/primal";
+import { Filterlist, NostrRelays, PrimalUser, SendNoteResult, VanityProfiles } from "../types/primal";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
 import { sendEvent } from "./notes";
@@ -231,33 +231,50 @@ export const sendProfile = async (metaData: any) => {
   return await sendEvent(event);
 };
 
-export const reportUser = async (pubkey: string | undefined, subid: string, user?: PrimalUser) => {
-  if (!pubkey) {
-    return false;
-  }
+
+export const reportUser = async (pubkey: string | undefined, reason: string) => {
+  if (!pubkey) return { success: false, reason: 'no_pubkey' } as SendNoteResult;
 
   const event = {
-    content: `{ "description": "report user '${userName(user)}'"}`,
-    kind: Kind.Settings,
-    tags: [["d", settingsApp, settingsDescription.reportUser]],
-    created_at: Math.ceil((new Date()).getTime() / 1000),
+    content: '',
+    kind: Kind.ReportContent,
+    tags: [
+      ['p', pubkey, reason],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  try {
-    const signedEvent = await signEvent(event);
+  return await sendEvent(event);
 
-    sendMessage(JSON.stringify([
-      "REQ",
-      subid,
-      {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
-    ]));
+}
 
-    return true;
-  } catch (reason) {
-    console.error('Failed to report user: ', reason);
-    return false;
-  }
-};
+// export const reportUser = async (pubkey: string | undefined, subid: string, user?: PrimalUser) => {
+//   if (!pubkey) {
+//     return false;
+//   }
+
+//   const event = {
+//     content: `{ "description": "report user '${userName(user)}'"}`,
+//     kind: Kind.Settings,
+//     tags: [["d", settingsApp, settingsDescription.reportUser]],
+//     created_at: Math.ceil((new Date()).getTime() / 1000),
+//   };
+
+//   try {
+//     const signedEvent = await signEvent(event);
+
+//     sendMessage(JSON.stringify([
+//       "REQ",
+//       subid,
+//       {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
+//     ]));
+
+//     return true;
+//   } catch (reason) {
+//     console.error('Failed to report user: ', reason);
+//     return false;
+//   }
+// };
 
 export const getFilterlists = (pubkey: string | undefined, subid: string, extended?: boolean) => {
   if (!pubkey) {

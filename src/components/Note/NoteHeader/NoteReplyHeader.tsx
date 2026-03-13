@@ -12,8 +12,6 @@ import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions, note as tNote } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { broadcastEvent } from '../../../lib/notes';
-import { reportUser } from '../../../lib/profile';
-import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
@@ -27,7 +25,6 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
   const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
-  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
 
   const rootAuthor = () => {
@@ -62,9 +59,8 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
   };
 
   const doReportUser = () => {
-    reportUser(props.note.user.pubkey, `report_user_${APP_ID}`, props.note.user);
+    app?.actions.openReportContent(props.note.user);
     setContext(false);
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(props.note.user)}));
   };
 
   const noteLinkId = () => {
@@ -194,7 +190,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
     {
       label: intl.formatMessage(tActions.noteContext.reportAuthor),
       action: () => {
-        setConfirmReportUser(true);
+        doReportUser();
         setContext(false);
       },
       icon: 'report',
@@ -281,16 +277,6 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
           hidden={!showContext()}
         />
       </div>
-
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName() })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
 
       <ConfirmModal
         open={confirmMuteUser()}

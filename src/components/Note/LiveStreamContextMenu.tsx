@@ -3,20 +3,16 @@ import { MenuItem, NostrNoteContent } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, userName } from '../../stores/profile';
+import { authorName } from '../../stores/profile';
 import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { APP_ID } from '../../App';
-import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { sendDeleteEvent } from '../../lib/notes';
 import { LiveStreamContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { readSecFromStorage } from '../../lib/localStore';
-import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import { encodeCoordinate } from '../../stores/megaFeed';
-import { StreamingData } from '../../lib/streaming';
 import {
   accountStore,
   addToMuteList,
@@ -39,7 +35,6 @@ const LiveStreamContextMenu: Component<{
   const app = useAppContext();
 
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
-  const [confirmReportContent, setConfirmReportContent] = createSignal<StreamingData>();
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
 
@@ -106,9 +101,8 @@ const LiveStreamContextMenu: Component<{
       }
     }
 
-    reportUser(stream().pubkey, `report_user_${APP_ID}`, props.data?.streamAuthor);
+    app?.actions.openReportContent(props.data?.streamAuthor);
     props.onClose();
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(props.data?.streamAuthor)}));
   };
 
   const liveHref = () => {
@@ -252,7 +246,7 @@ const LiveStreamContextMenu: Component<{
         label: intl.formatMessage(tActions.streamContext.reportContent),
         action: () => {
           const n = stream();
-          n && setConfirmReportContent(() => ({ ...n }));
+          n && app?.actions.openReportContent(n);
           props.onClose();
         },
         icon: 'report',
@@ -296,11 +290,6 @@ const LiveStreamContextMenu: Component<{
           setConfirmReportUser(false);
         }}
         onAbort={() => setConfirmReportUser(false)}
-      />
-
-      <ReportContentModal
-        note={confirmReportContent()}
-        onClose={() => setConfirmReportContent(undefined)}
       />
 
       <ConfirmModal
